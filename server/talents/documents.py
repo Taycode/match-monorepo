@@ -7,7 +7,7 @@ from talents.models import Talent
 class TalentDocument(Document):
     class Index:
         # Name of the Elasticsearch index
-        name = 'cars'
+        name = 'talents'
         # See Elasticsearch Indices API reference for available settings
         settings = {'number_of_shards': 1, 'number_of_replicas': 0}
 
