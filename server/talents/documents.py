@@ -1,10 +1,12 @@
-from django_elasticsearch_dsl import Document
+from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from talents.models import Talent
 
 
 @registry.register_document
 class TalentDocument(Document):
+    skills = fields.TextField(attr='skills_list_method')
+
     class Index:
         # Name of the Elasticsearch index
         name = 'talents'
@@ -13,4 +15,7 @@ class TalentDocument(Document):
 
     class Django:
         model = Talent
-        fields = ['skills', 'role', 'years_of_experience']
+        fields = ['id', 'first_name', 'last_name', 'role', 'years_of_experience']
+
+    def skills_list_method(self, instance: Talent):
+        return instance.skills

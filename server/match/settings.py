@@ -89,7 +89,10 @@ DATABASES = {
 ELASTICSEARCH_DSL = {
     'default': {
         'hosts': os.environ.get('ELASTICSEARCH_URL'),
-        'http_auth': ('username', 'password')
+        'http_auth': (
+            os.environ.get('ELASTICSEARCH_USERNAME'),
+            os.environ.get('ELASTICSEARCH_PASSWORD')
+        )
     }
 }
 
@@ -144,3 +147,6 @@ REST_FRAMEWORK = {
     'ORDERING_PARAM': 'ordering',
 }
 
+ELASTICSEARCH_INDEX_NAMES = {
+    'talents.documents': 'talents',
+}
