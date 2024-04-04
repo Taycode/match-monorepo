@@ -51,8 +51,6 @@ from django_elasticsearch_dsl_drf.filter_backends import FilteringFilterBackend
 
 class CustomTalentFilterBackend(FilteringFilterBackend):
     def filter_queryset(self, request, queryset, view):
-        # Get the JSON data from the request
-        json_data = request.data
         query = request.query_params.get('q', None)
         print(query)
         if query:
