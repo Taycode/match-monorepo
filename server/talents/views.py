@@ -1,7 +1,7 @@
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
 from talents.documents import TalentDocument
-from talents.filter_backend import KeywordParserFilterBackend
+from talents.filter_backend import KeywordParserFilterBackend, CustomTalentFilterBackend
 from talents.serializers import TalentDocumentSerializer
 from django_elasticsearch_dsl_drf.constants import (
     LOOKUP_FILTER_TERMS,
@@ -15,27 +15,48 @@ from django_elasticsearch_dsl_drf.constants import (
     LOOKUP_QUERY_LTE,
     LOOKUP_QUERY_EXCLUDE,
 )
+
+from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
+
 from django_elasticsearch_dsl_drf.filter_backends import (
     FilteringFilterBackend,
     IdsFilterBackend,
     OrderingFilterBackend,
     DefaultOrderingFilterBackend,
     SearchFilterBackend,
+    CompoundSearchFilterBackend
 )
 
 
-class TalentDocumentViewSet(BaseDocumentViewSet):
+class TalentDocumentViewSet(DocumentViewSet):
     document = TalentDocument
     serializer_class = TalentDocumentSerializer
     pagination_class = PageNumberPagination
     lookup_field = 'id'
-    filter_backends = (KeywordParserFilterBackend, )
+    filter_backends = [
+    CustomTalentFilterBackend
+    ]
+
+#TAS
     # search_fields = (
     #     'id',
     #     'skills',
     #     'role',
     #     'years_of_experience',
     # )
+    
+    # multi_match_fields = (
+    #     'id',
+    #     'skills',
+    #     'role',
+    #     'years_of_experience',
+    # )
+    
+    # filter_fields = {
+    #     'id'
+    # }
+#TAS
+
     # filter_fields = {
     #     'id': 'id',
     #     'role': 'role.raw',
