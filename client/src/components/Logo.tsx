@@ -70,16 +70,14 @@ function Logo() {
             : rotateTwo
             ? `rotate(120deg)`
             : "none",
-          transition: rotateTwo
-            ? "transform 2s ease-in-out"
-            : "transform 2s ease-in-out",
+          transition: "transform 2s ease-out",
         }}
       />
       <VectorThree
         fill={colors.fillThree}
         style={{
           transform: swapPositions ? "translateX(-55px)" : "none",
-          transition: "transform 2s ease-in-out",
+          transition: "transform 2s ease-out",
         }}
       />
     </div>
