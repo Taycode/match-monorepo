@@ -17,3 +17,6 @@ class Talent(models.Model):
 
     class Meta:
         db_table = 'talents'
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
