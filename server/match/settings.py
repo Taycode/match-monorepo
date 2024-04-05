@@ -150,5 +150,4 @@ REST_FRAMEWORK = {
 ELASTICSEARCH_INDEX_NAMES = {
     'talents.documents': 'talents',
 }
-OPENAPI_API_KEY = os.environ.get('OPENAPI_API_KEY')
-
+OPENAPI_API_KEY = os.environ.get('OPENAI_API_KEY')

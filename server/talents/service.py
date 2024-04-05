@@ -25,9 +25,8 @@ class TalentService:
     def process_keyword(query: str) -> ParsedResponse:
         message = TalentService.build_completion_message(query)
         response = OpenAPIClient.query(message)
-        print(response)
         try:
-            filter_data = {}
+            filter_data = json.loads(response.content)
             role = filter_data.get('role')
             skills = filter_data.get('skills', [])
             years_of_experience = filter_data.get('years_of_experience')

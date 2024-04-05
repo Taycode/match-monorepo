@@ -11,9 +11,9 @@ class KeywordParserFilterBackend(BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         query = request.query_params.get('q', None)
+
         if query:
             parsed_response = TalentService.process_keyword(query)
-
 
             # Initialize a list to hold all query components
             must_queries = []
@@ -21,7 +21,6 @@ class KeywordParserFilterBackend(BaseFilterBackend):
             # Filter by role if it's specified
             if parsed_response.role:
                 must_queries.append(Q("match", role=parsed_response.role))
-
 
             # Filter by skills if any are specified
             if parsed_response.skills:
