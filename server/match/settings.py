@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "django_elasticsearch_dsl",
+    "django_elasticsearch_dsl_drf",
     "users",
     "talents",
 ]
@@ -86,7 +89,10 @@ DATABASES = {
 ELASTICSEARCH_DSL = {
     'default': {
         'hosts': os.environ.get('ELASTICSEARCH_URL'),
-        'http_auth': ('username', 'password')
+        'http_auth': (
+            os.environ.get('ELASTICSEARCH_USERNAME'),
+            os.environ.get('ELASTICSEARCH_PASSWORD')
+        )
     }
 }
 
@@ -130,3 +136,18 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = 'users.CustomUser'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 100,
+    'ORDERING_PARAM': 'ordering',
+}
+
+ELASTICSEARCH_INDEX_NAMES = {
+    'talents.documents': 'talents',
+}
+OPENAPI_API_KEY = os.environ.get('OPENAI_API_KEY')
