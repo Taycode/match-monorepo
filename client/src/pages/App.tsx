@@ -1,6 +1,13 @@
+import gridlines from "../assets/grid-layer.png";
+
 function App() {
   return (
-    <div className="w-screen h-screen flex justify-center text-center bg-[#F7F7F7]">
+    <div
+      style={{
+        backgroundImage: `url(${gridlines})`,
+      }}
+      className="w-screen h-screen bg-no-repeat bg-cover bg-center flex justify-center text-center bg-[#E2E1EC]"
+    >
       <div className="flex flex-col justify-center text-primary">
         <h1 className="text-4xl font-bold">Welcome to HayaNG</h1>
         <p className="text-lg mt-4">Fawaz never give us landing page😂😂😂</p>

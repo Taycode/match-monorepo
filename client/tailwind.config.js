@@ -8,6 +8,9 @@ export default {
         secondary: "#4E5B92",
         gray: "#77767A",
       },
+      fontFamily: {
+        satoshi: ["Satoshi", "sans-serif"],
+      },
     },
   },
   plugins: [],
