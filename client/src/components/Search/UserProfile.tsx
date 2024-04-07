@@ -28,7 +28,7 @@ function UserProfile({
         .map((talent: TalentType) => (
           <div
             key={talent.id}
-            className="border border-solid border-[#C6C5D0] w-full shadow-sm shadow-[#C6C5D0] rounded-2xl"
+            className="border border-solid border-[#C6C5D0] bg-white w-full shadow-sm shadow-[#C6C5D0] rounded-2xl"
           >
             <div className="bg-[#05164B] h-40 w-full rounded-t-xl flex gap-3 items-center py-4 px-3 relative">
               <button
