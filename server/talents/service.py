@@ -12,10 +12,9 @@ class TalentService:
         {{
         "role": "",
         "skills": [],
-        "years_of_experience": "",
+        "years_of_experience": {{ "gte": "", "lte": "" }},
         }}
-        where years of experience is >=5 for minimum of 5 years and <=5 for less than 5 years.
-        
+                
         using this query
         
         {query}
@@ -30,6 +29,12 @@ class TalentService:
             role = filter_data.get('role')
             skills = filter_data.get('skills', [])
             years_of_experience = filter_data.get('years_of_experience')
+            # remove empty fields
+            years_of_experience = {
+                key: value
+                for key, value in years_of_experience.items()
+                if value
+            }
         except Exception as e:
             raise e
         return ParsedResponse(

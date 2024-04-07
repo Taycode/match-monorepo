@@ -14,7 +14,6 @@ class KeywordParserFilterBackend(BaseFilterBackend):
 
         if query:
             parsed_response = TalentService.process_keyword(query)
-
             # Initialize a list to hold all query components
             must_queries = []
 
@@ -30,15 +29,12 @@ class KeywordParserFilterBackend(BaseFilterBackend):
 
             # Filter by years of experience if specified
             if parsed_response.years_of_experience:
+
                 # Adjust the range filter according to the years_of_experience logic
-                number = parsed_response.years_of_experience[2:]
-                number = int(number)
-                range_query = {"gte": number} if parsed_response.years_of_experience.startswith('>=') else {"lt": number}
-                must_queries.append(Q("range", years_of_experience=range_query))
+                must_queries.append(Q("range", years_of_experience=parsed_response.years_of_experience))
 
             # Apply the compiled queries to the search
             if must_queries:
                 queryset = queryset.query('bool', must=must_queries)
 
         return queryset
-
