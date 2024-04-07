@@ -5,4 +5,4 @@ from dataclasses import dataclass
 class ParsedResponse:
     role: str
     skills: list
-    years_of_experience: str
+    years_of_experience: dict
