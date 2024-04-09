@@ -14,29 +14,42 @@
   display: none;
 }
 
+/* no-repeat linear-gradient(red 0 0) 0 0,
+    no-repeat linear-gradient(blue 0 0) 0 100%,
+    no-repeat linear-gradient(green 0 0) 0 100%,
+    no-repeat linear-gradient(white 0 0) 100% 0,
+    no-repeat linear-gradient(purple 0 0) 100% 100%,
+    no-repeat linear-gradient(brown 0 0) 0% 100%,
+    no-repeat linear-gradient(cyan 0 0) 100% 0,
+    no-repeat linear-gradient(indigo 0 0) 100% 0%,
+    no-repeat linear-gradient(black 0 0) 100% 100%; */
+
+/* HTML: <div class="loader"></div> */
 .loader {
-  width: 40px;
-  height: 40px;
   --c: no-repeat linear-gradient(#b7c4ff 0 0);
-  background: var(--c), var(--c), var(--c), var(--c);
-  background-size: 21px 21px;
-  animation: l5 1.5s infinite cubic-bezier(0.3, 1, 0, 1);
+  background: var(--c), var(--c), var(--c), var(--c), var(--c), var(--c),
+    var(--c), var(--c), var(--c);
+  background-size: 16px 16px;
+  animation: l31 1s infinite alternate;
 }
-@keyframes l5 {
+@keyframes l31 {
   0% {
-    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+    width: 24px;
+    height: 24px;
+    background-position: 0 0, 100% 0, 100% 0, 0 100%, 0% 0%, 100% 0%, 0 100%,
+      0% 100%, 100% 100%;
   }
-  33% {
-    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
-    width: 60px;
-    height: 60px;
+  40% {
+    width: 40px;
+    height: 40px;
+    background-position: 0 0, 0 0, 100% 0, 100% 0%, 0% 100%, 100% 100%, 0 100%,
+      0% 100%, 100% 100%;
   }
-  66% {
-    background-position: 100% 0, 100% 100%, 0 100%, 0 0;
-    width: 60px;
-    height: 60px;
-  }
+  90%,
   100% {
-    background-position: 100% 0, 100% 100%, 0 100%, 0 0;
+    width: 65px;
+    height: 65px;
+    background-position: 0 0, 50% 0, 100% 0, 50% 50%, 50% 100%, 100% 50%, 0 100%,
+      0% 50%, 100% 100%;
   }
 }

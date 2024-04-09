@@ -62,6 +62,7 @@ function StepTwo({
           />
           <input
             type="text"
+            autoFocus
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             placeholder="Search talents to haya"
