@@ -44,13 +44,13 @@ function UserProfile({
                 />
               </span>
               <div>
-                <h2 className="text-white font-medium text-lg lg:text-3xl">
+                <h2 className="text-white font-medium text-lg lg:text-2xl">
                   {talent.name}
                 </h2>
-                <h6 className="text-white lg:text-xl lg:font-medium mt-1 font-satoshi">
+                <h6 className="text-white lg:text-lg lg:font-medium mt-1 font-satoshi">
                   {talent.expertise}
                 </h6>
-                <p className="text-white lg:text-xl lg:font-medium font-satoshi">
+                <p className="text-white lg:text-lg lg:font-medium font-satoshi">
                   {talent.experience < 1 ? "< 1" : talent.experience} yr
                   {talent.experience > 1 ? "s" : ""} of experience
                 </p>
@@ -100,14 +100,16 @@ function UserProfile({
               </a>
 
               <div className="py-4 px-2 bg-[#F1F0FA] rounded-xl">
-                <h2 className="text-[#1B1B1E] font-medium text-lg">Summary</h2>
+                <h2 className="text-[#1B1B1E] font-medium text-sm md:text-base">
+                  Summary
+                </h2>
                 <hr className="w-full mt-2 mb-4 text-[#C6C5CF]" />
                 <p className="text-[#2F3038] font-satoshi line-clamp-4">
                   {talent.description}
                 </p>
               </div>
               <div className="py-4 px-2 bg-[#F1F0FA] rounded-xl">
-                <h2 className="text-[#1B1B1E] font-medium text-lg">
+                <h2 className="text-[#1B1B1E] font-medium text-sm md:text-base">
                   Skill/Stack
                 </h2>
                 <hr className="w-full mt-2 mb-4 text-[#C6C5CF]" />

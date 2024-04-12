@@ -66,7 +66,7 @@ function StepTwo({
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             placeholder="Search talents to haya"
-            className="w-full py-4 bg-transparent border-0 focus:outline-none text-[#C6C5CF] text-xl md:text-4xl"
+            className="w-full py-4 bg-transparent border-0 focus:outline-none placeholder:text-[#C6C5CF] text-[#525256] text-xl md:text-4xl"
           />
         </div>
         <span

@@ -43,14 +43,14 @@ function FilterModal({
       className="z-[200] bg-white rounded-3xl max-w-lg max-h-full no-scrollbar overflow-y-auto w-full flex flex-col p-4 md:p-6"
     >
       <div className="flex justify-between items-center">
-        <h2 className="font-medium md:font-semibold md:text-xl">
+        <h2 className="font-medium md:font-medium md:text-lg">
           Filter Talents
         </h2>
         <span
           onClick={() => setModal(null)}
           className="bg-[#F1F0FA] p-1 rounded-xl cursor-pointer"
         >
-          <img src={cancel} alt="back" />
+          <img src={cancel} alt="back" className="w-4" />
         </span>
       </div>
       <p className="text-[#76767F] text-xs md:text-sm font-medium mt-1 md:mt-3 mb-2 md:mb-4 font-satoshi">
@@ -58,7 +58,7 @@ function FilterModal({
         talent(s) to haya.
       </p>
       <div>
-        <h3 className="mb-1 md:mb-2 text-[#1a1b21] text-sm md:text-base font-medium">
+        <h3 className="mb-1 md:mb-2 text-[#1a1b21] text-sm font-medium">
           Experience level
         </h3>
         <ul className="ml-2 flex flex-col gap-1 md:gap-2">
@@ -70,11 +70,9 @@ function FilterModal({
                 checked={newFilters.experience === "Entry-level"}
                 onChange={() => handleFilterChange("experience", "Entry-level")}
               />
-              <label className="font-satoshi text-sm md:text-base">
-                Entry level
-              </label>
+              <label className="font-satoshi text-[13px]">Entry level</label>
             </div>
-            <p className="text-[#919094] font-satoshi text-sm md:text-base font-medium">
+            <p className="text-[#919094] font-satoshi text-[13px] font-medium">
               {"< 1yr exp"}
             </p>
           </li>
@@ -88,11 +86,9 @@ function FilterModal({
                   handleFilterChange("experience", "Junior-level")
                 }
               />
-              <label className="font-satoshi text-sm md:text-base">
-                Junior level
-              </label>
+              <label className="font-satoshi text-[13px]">Junior level</label>
             </div>
-            <p className="text-[#919094] font-satoshi text-sm md:text-base font-medium">
+            <p className="text-[#919094] font-satoshi text-[13px] font-medium">
               {"1yr - 2yrs exp"}
             </p>
           </li>
@@ -104,11 +100,9 @@ function FilterModal({
                 checked={newFilters.experience === "Mid-level"}
                 onChange={() => handleFilterChange("experience", "Mid-level")}
               />
-              <label className="font-satoshi text-sm md:text-base">
-                Mid level
-              </label>
+              <label className="font-satoshi text-[13px]">Mid level</label>
             </div>
-            <p className="text-[#919094] font-satoshi text-sm md:text-base font-medium">
+            <p className="text-[#919094] font-satoshi text-[13px] font-medium">
               {"2yrs - 4yrs exp"}
             </p>
           </li>
@@ -122,18 +116,16 @@ function FilterModal({
                   handleFilterChange("experience", "Senior-level")
                 }
               />
-              <label className="font-satoshi text-sm md:text-base">
-                Senior level
-              </label>
+              <label className="font-satoshi text-[13px]">Senior level</label>
             </div>
-            <p className="text-[#919094] font-satoshi text-sm md:text-base font-medium">
+            <p className="text-[#919094] font-satoshi text-[13px] font-medium">
               {"4+ yrs exp"}
             </p>
           </li>
         </ul>
       </div>
       <div className="mt-2 md:mt-4">
-        <h3 className="mb-1 md:mb-2 text-[#1a1b21] text-sm md:text-base font-medium">
+        <h3 className="mb-1 md:mb-2 text-[#1a1b21] text-sm font-medium">
           Match score
         </h3>
         <ul className="ml-2 flex flex-col gap-2">
@@ -145,9 +137,7 @@ function FilterModal({
                 checked={newFilters.matchScore === "< 5.0"}
                 onChange={() => handleFilterChange("matchScore", "< 5.0")}
               />
-              <label className="font-satoshi text-sm md:text-base">
-                {"< 5.0"}
-              </label>
+              <label className="font-satoshi text-[13px]">{"< 5.0"}</label>
             </div>
           </li>
           <li className="flex items-center justify-between w-full">
@@ -158,9 +148,7 @@ function FilterModal({
                 checked={newFilters.matchScore === "5.0-7.5"}
                 onChange={() => handleFilterChange("matchScore", "5.0-7.5")}
               />
-              <label className="font-satoshi text-sm md:text-base">
-                {"5.0 - 7.5"}
-              </label>
+              <label className="font-satoshi text-[13px]">{"5.0 - 7.5"}</label>
             </div>
           </li>
           <li className="flex items-center justify-between w-full">
@@ -171,9 +159,7 @@ function FilterModal({
                 checked={newFilters.matchScore === "7.5-9.0"}
                 onChange={() => handleFilterChange("matchScore", "7.5-9.0")}
               />
-              <label className="font-satoshi text-sm md:text-base">
-                {"7.5 - 9.0"}
-              </label>
+              <label className="font-satoshi text-[13px]">{"7.5 - 9.0"}</label>
             </div>
           </li>
           <li className="flex items-center justify-between w-full">
@@ -184,9 +170,7 @@ function FilterModal({
                 checked={newFilters.matchScore === "9.0-10"}
                 onChange={() => handleFilterChange("matchScore", "9.0-10")}
               />
-              <label className="font-satoshi text-sm md:text-base">
-                {"9.0 - 10.0"}
-              </label>
+              <label className="font-satoshi text-[13px]">{"9.0 - 10.0"}</label>
             </div>
           </li>
         </ul>
@@ -194,16 +178,16 @@ function FilterModal({
       <div className="flex gap-4 items-center self-end mt-4">
         <button
           onClick={handleReset}
-          className="gap-1 flex items-center font-satoshi text-primary text-sm md:text-base font-medium p-1.5 md:p-2.5 bg-[#F1F0FA] rounded-xl"
+          className="gap-1 flex items-center font-satoshi text-primary text-sm font-medium p-1.5 md:p-2.5 bg-[#F1F0FA] rounded-xl"
         >
-          <img src={reset} alt="reset" className="w-4 md:w-full" />
+          <img src={reset} alt="reset" className="w-4" />
           Reset
         </button>
         <button
           onClick={handleApplyFilters}
-          className="bg-primary text-white flex gap-1 items-center text-sm md:text-base p-1.5 md:p-2.5 font-satoshi font-medium rounded-xl"
+          className="bg-primary text-white flex gap-1 items-center text-sm p-1.5 md:p-2.5 font-satoshi font-medium rounded-xl"
         >
-          <img src={tick} alt="tick" className="w-4 md:w-full" />
+          <img src={tick} alt="tick" className="w-4" />
           Apply filters
         </button>
       </div>

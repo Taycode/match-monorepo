@@ -29,12 +29,10 @@ function Hero({
       <div className="flex justify-between items-center my-4 md:my-8">
         <button className="p-3 rounded-xl bg-[#F1F0FA] flex items-center gap-1 md:gap-2">
           <img src={back} alt="back" />
-          <span className="text-primary text-sm md:text-base font-medium">
-            Back
-          </span>
+          <span className="text-primary text-sm">Back</span>
         </button>
         <p
-          className={`text-[#77767A] font-medium hidden md:block text-xl ${
+          className={`text-[#77767A] hidden font-medium md:block text-base ${
             !queryParamValue && "hidden"
           }`}
         >
@@ -62,7 +60,7 @@ function Hero({
                 : "#092470"
             }
           />
-          <span className="text-sm md:text-base font-medium">Filter</span>
+          <span className="text-sm">Filter</span>
         </button>
       </div>
       <p
@@ -82,13 +80,11 @@ function Hero({
           {Object.keys(filters).map((filter: string) => (
             <div
               key={filter}
-              className={`flex items-center gap-1 md:gap-4 bg-[#DDE1FF] border border-[#05164B] border-solid rounded-xl p-1.5 md:p-3 ${
+              className={`flex items-center gap-1 md:gap-2 bg-[#DDE1FF] border border-[#05164B] border-solid rounded-xl p-1.5 md:p-2 ${
                 !filters[filter] && "hidden"
               } `}
             >
-              <span className="text-[#05164B] text-sm md:text-base md:font-medium">
-                {filters[filter]}
-              </span>
+              <span className="text-[#05164B] text-sm">{filters[filter]}</span>
               <button
                 className="bg-transparent w-4 md:w-6"
                 onClick={() =>
@@ -98,7 +94,7 @@ function Hero({
                   })
                 }
               >
-                <img src={cancel} alt="cancel" />
+                <img src={cancel} alt="cancel" className="w-4" />
               </button>
             </div>
           ))}
@@ -110,11 +106,11 @@ function Hero({
               matchScore: "",
             })
           }
-          className={`bg-[#F1F0FA] rounded-xl p-1 md:p-3 flex gap-0.5 md:gap-2 text-primary font-satoshi font-medium ${
+          className={`bg-[#F1F0FA] rounded-xl p-1 md:p-3 flex gap-0.5 md:gap-2 text-primary font-satoshi text-sm font-medium ${
             !filters.experience && !filters.matchScore && "hidden"
           }`}
         >
-          <img src={deleted} alt="deleted" />
+          <img src={deleted} alt="deleted" className="w-4" />
           Clear all filters
         </button>
       </div>

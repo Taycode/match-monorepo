@@ -69,7 +69,7 @@ function SignIn() {
                 name="email"
                 onChange={handleInputChange}
                 placeholder="email address"
-                className="py-3 outline-none bg-transparent placeholder:text-[#ACAAAE] font-medium text-[#1A1B21] text-sm w-full"
+                className="py-3 outline-none bg-transparent placeholder:text-[#ACAAAE] font-satoshi font-medium text-[#1A1B21] text-sm w-full"
               />
             </div>
 
@@ -82,7 +82,7 @@ function SignIn() {
                 name="password"
                 onChange={handleInputChange}
                 placeholder="password"
-                className="py-3 outline-none bg-transparent placeholder:text-[#ACAAAE] font-medium text-[#1A1B21] text-sm w-full"
+                className="py-3 outline-none bg-transparent placeholder:text-[#ACAAAE] font-satoshi font-medium text-[#1A1B21] text-sm w-full"
               />
               <button
                 type="button"
