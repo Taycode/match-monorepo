@@ -1,16 +1,3 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
-
-class YOE(BaseModel):
-    gte: int = Field(description="greater digit of years of experience")
-    lte: Optional[int] = Field(description="lower digit of years of experience")
-    
-class SearchFields(BaseModel):
-    role: str = Field(description="role")
-    skills: List[str] = None
-    years_of_experience: YOE = Field(description="Years of experience (can be two, where the greater digit is gte and the lower digit is lte or one, where the greter digit is gte and lte is null)")
-
-
 tools = [
     {
         "type": "function",

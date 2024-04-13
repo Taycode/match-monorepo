@@ -1,6 +1,6 @@
 from openai import OpenAI
 from django.conf import settings
-from .schemas import tools, SearchFields
+from .schemas import tools
 
 #
 class OpenAPIClient:
@@ -20,9 +20,9 @@ class OpenAPIClient:
         response = client.chat.completions.create(
             model='gpt-3.5-turbo',
             temperature=0.1,
-            response_format={"type": "json_object", 
-                            #  "schema": SearchFields.model_json_schema()
-                             },
+            response_format={
+                "type": "json_object", 
+            },
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that can access external functions. You only answer in JSON as you are part of an existing strict code base. Not apllicable fields can be set to null."},
                 {'role': 'user', 'content': message}
