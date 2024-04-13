@@ -23,7 +23,3 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path(r"", include(talent_router.urls))
 ]
-
-urlpatterns+=[
-    path('api-auth/', include('rest_framework.urls'),),
-]
