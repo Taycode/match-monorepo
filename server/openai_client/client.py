@@ -7,16 +7,16 @@ class OpenAPIClient:
     client = None
 
     @staticmethod
-    def build_client(api_key):
+    def build_client():
         if OpenAPIClient.client is None:
             OpenAPIClient.client = OpenAI(
-                api_key=api_key # Ensure the setting name is correct
+                api_key=settings.OPENAPI_API_KEY  # Ensure the setting name is correct
             )
         return OpenAPIClient.client
 
     @staticmethod
-    def query(message: str, api_key=settings.OPENAPI_API_KEY):
-        client = OpenAPIClient.build_client(api_key=api_key)
+    def query(message: str):
+        client = OpenAPIClient.build_client()
         response = client.chat.completions.create(
             model='gpt-3.5-turbo',
             temperature=0.1,
