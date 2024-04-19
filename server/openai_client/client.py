@@ -1,6 +1,6 @@
 from openai import OpenAI
 from django.conf import settings
-from .schemas import tools
+from .schemas import TOOLS
 
 #
 class OpenAPIClient:
@@ -27,7 +27,7 @@ class OpenAPIClient:
                 {"role": "system", "content": "You are a helpful assistant that can access external functions. You only answer in JSON as you are part of an existing strict code base. Not apllicable fields can be set to null."},
                 {'role': 'user', 'content': message}
             ],
-            tools=tools,
+            tools=TOOLS,
             tool_choice="auto",
             max_tokens=256,
             n=1,
