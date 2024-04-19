@@ -2,8 +2,10 @@ from django.shortcuts import render
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from .serializers import CustomAuthTokenSerializer
 
 class CustomAuthToken(ObtainAuthToken):
+    serializer_class=CustomAuthTokenSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
