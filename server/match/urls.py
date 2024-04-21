@@ -20,5 +20,6 @@ from talents.urls import router as talent_router
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('users/', include('users.urls')),
     path(r"", include(talent_router.urls))
 ]
