@@ -91,8 +91,8 @@ ELASTICSEARCH_DSL = {
     'default': {
         'hosts': os.environ.get('ELASTICSEARCH_URL'),
         'http_auth': (
-            os.environ.get('ELASTICSEARCH_USERNAME'),
-            os.environ.get('ELASTICSEARCH_PASSWORD')
+            os.environ.get('ELASTICSEARCH_USERNAME', ''),
+            os.environ.get('ELASTICSEARCH_PASSWORD', '')
         )
     }
 }
