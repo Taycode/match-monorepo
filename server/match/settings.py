@@ -87,12 +87,23 @@ DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
 
-ELASTICSEARCH_DSL = {
-    'default': {
+print(DATABASES, flush=True)
+
+elasticsearch_config = {
         'hosts': os.environ.get('ELASTICSEARCH_URL'),
         'http_auth': (
             os.environ.get('ELASTICSEARCH_USERNAME'),
             os.environ.get('ELASTICSEARCH_PASSWORD')
+        )
+}
+
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': os.environ.get('ELASTICSEARCH_URL'),
+        'http_auth': (
+            os.environ.get('ELASTICSEARCH_USERNAME', ''),
+            os.environ.get('ELASTICSEARCH_PASSWORD', '')
         )
     }
 }
