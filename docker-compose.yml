@@ -23,7 +23,8 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
 
-  web:
+  server:
+    platform: linux/amd64
     build: ./server
     command: python manage.py runserver 0.0.0.0:7222
     volumes:
@@ -33,6 +34,18 @@ services:
     depends_on:
       - db
       - elasticsearch
+  client:
+    platform: linux/amd64
+    build:
+      context: ./client
+    ports:
+      - '5222:5222'
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+    command: serve -s dist -l 5222
 
 volumes:
   postgres_data:
