@@ -1,0 +1,38 @@
+# Dependency directories
+node_modules/
+npm-debug.log
+
+# Build outputs
+build/
+dist/
+out/
+
+# Git and version control
+.git/
+.gitignore
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.sublime-workspace
+*.swp
+*.swo
+
+# Logs
+*.log
+logs
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Others
+README.md
+LICENSE
+.Dockerfile.swp
