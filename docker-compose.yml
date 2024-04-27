@@ -24,7 +24,6 @@ services:
       - elasticsearch_data:/usr/share/elasticsearch/data
 
   server:
-    platform: linux/amd64
     build: ./server
     command: python manage.py runserver 0.0.0.0:7222
     volumes:
@@ -35,7 +34,6 @@ services:
       - db
       - elasticsearch
   client:
-    platform: linux/amd64
     build:
       context: ./client
     ports:
