@@ -22,7 +22,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./client
-          file: Dockerfile
+          file: ./client/Dockerfile
           push: true
           tags: hayadev/client:latest
 
@@ -30,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./server
-          file: Dockerfile
+          file: ./server/Dockerfile
           push: true
           tags: hayadev/server:latest
 
