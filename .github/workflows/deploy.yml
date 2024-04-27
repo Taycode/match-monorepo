@@ -3,10 +3,11 @@ run-name: ${{ github.actor }} is deploying using  GitHub Actions 🚀
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   build_and_push_client:
     runs-on: ubuntu-latest
+    environment: Deployment
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -35,6 +36,7 @@ jobs:
 
   deploy_client_to_render:
     runs-on: ubuntu-latest
+    environment: Deployment
     needs: build_and_push_client
     steps:
       - name: Deploy to Render
@@ -43,6 +45,7 @@ jobs:
 
   deploy_server_to_render:
       runs-on: ubuntu-latest
+      environment: Deployment
       needs: build_and_push_client
       steps:
         - name: Deploy server to Render
