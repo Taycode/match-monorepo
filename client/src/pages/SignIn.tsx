@@ -4,6 +4,7 @@ import design from "../assets/design.svg";
 import frontend from "../assets/frontend.svg";
 import gridlines from "../assets/grid-layer.png";
 import google from "../assets/Google.svg";
+import logo from "../assets/logo.svg";
 import mobile from "../assets/mobile.svg";
 import { EyeIcon, EyeSlashIcon, LockIcon, UserIcon } from "../assets/icons";
 
@@ -30,9 +31,7 @@ function SignIn() {
         href="/"
         className="absolute text-center top-6 md:left-20 mb-4 md:mb-0"
       >
-        <h2 className="text-primary font-black text-xl md:text-2xl lg:text-4xl font-satoshi">
-          haya.ng
-        </h2>
+        <img src={logo} alt="logo" />
       </a>
       <div className="max-w-screen-xl w-full flex justify-center relative">
         <img

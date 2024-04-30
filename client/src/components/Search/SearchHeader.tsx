@@ -1,6 +1,7 @@
 import bell from "../../assets/notification.svg";
 import cancel from "../../assets/cancel.svg";
 import lens from "../../assets/search-02.svg";
+import logo from "../../assets/logo.svg";
 import user from "../../assets/user.svg";
 import arrow from "../../assets/arrow-down.svg";
 import { Link } from "react-router-dom";
@@ -29,9 +30,7 @@ function SearchHeader({
     <div>
       <header className="flex justify-between items-center w-full gap-2">
         <Link to="/">
-          <h1 className="text-primary font-bold text-lg md:text-2xl font-satoshi">
-            haya.ng
-          </h1>
+          <img src={logo} alt="logo" />
         </Link>
 
         <div className="py-2 lg:py-4 px-3 lg:px-5 hidden md:flex items-center justify-between w-3/5 bg-[#F1F0FA] rounded-xl">

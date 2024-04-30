@@ -2,6 +2,7 @@ import Logo from "../Logo";
 import arrow from "../../assets/arrow-down.svg";
 import bell from "../../assets/notification.svg";
 import lens from "../../assets/search-02.svg";
+import logo from "../../assets/logo.svg";
 import search from "../../assets/searching.svg";
 import user from "../../assets/user.svg";
 
@@ -46,9 +47,7 @@ function StepOne({
         <div className="max-w-5xl w-full mx-auto flex flex-col items-center gap-8">
           <Logo />
           <a href="/">
-            <h2 className="text-primary font-black text-6xl font-satoshi">
-              haya.ng
-            </h2>
+            <img src={logo} alt="logo" />
           </a>
           <p className="font-medium text-[#05164B]">
             Your preferred tech talent search engine

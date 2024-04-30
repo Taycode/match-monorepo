@@ -1,23 +1,19 @@
-import gridlines from "../assets/grid-layer.png";
+import About from "../components/HomePage/About";
+import Faq from "../components/HomePage/Faq";
+import Footer from "../components/HomePage/Footer";
+import Hero from "../components/HomePage/Hero";
+import HowItWorks from "../components/HomePage/HowItWorks";
+import Navbar from "../components/HomePage/Navbar";
 
 function App() {
   return (
-    <div
-      style={{
-        backgroundImage: `url(${gridlines})`,
-      }}
-      className="w-screen h-screen bg-no-repeat bg-cover bg-center flex justify-center text-center bg-[#E2E1EC]"
-    >
-      <div className="flex flex-col justify-center text-primary">
-        <h1 className="text-4xl font-bold">Welcome to HayaNG</h1>
-        <p className="text-lg mt-4">Fawaz never give us landing page😂😂😂</p>
-
-        <a href="/searchengine">
-          <button className="mt-4 px-4 py-2 bg-secondary text-white rounded-md">
-            Go to searchengine
-          </button>
-        </a>
-      </div>
+    <div className="bg-[#FBF8FF] h-screen">
+      <Navbar />
+      <Hero />
+      <About />
+      <HowItWorks />
+      <Faq />
+      <Footer />
     </div>
   );
 }

@@ -18,7 +18,7 @@ function SearchEngine() {
       style={{
         backgroundImage: `url(${gridlayer})`,
       }}
-      className="w-screen h-screen bg-[#E2E1EC] bg-no-repeat bg-cover overflow-y-auto bg-center"
+      className="w-screen h-screen bg-[#FBF8FF] bg-no-repeat bg-cover overflow-y-auto bg-center"
     >
       {currentModal && <ModalLayout />}
       {
