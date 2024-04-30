@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import arrowEnter from "../../assets/arrow-back.svg";
 import cancel from "../../assets/cancel.svg";
 import lens from "../../assets/search-02.svg";
+import logo from "../../assets/searchenginehaya.svg";
 import { topLeftVariants } from "../../utils/transitions";
 import useStore from "../../store";
 
@@ -53,7 +54,8 @@ function StepTwo({
         currentModal && "blur-sm"
       }`}
     >
-      <div className="p-4 flex items-center justify-between w-full border-0 border-b border-solid border-[#C6C5CF]">
+      <img src={logo} alt="logo" className="absolute bottom-0 -left-12" />
+      <div className="p-4 z-10 flex items-center justify-between w-full border-0 border-b border-solid border-[#C6C5CF]">
         <div className="flex gap-6 items-center w-full">
           <img
             src={lens}
@@ -77,7 +79,7 @@ function StepTwo({
           <img src={cancel} alt="cancel" onClick={() => setSearchText("")} />
         </span>
       </div>
-      <p className="mt-6 text-[#77767A] font-medium text-sm md:text-xl flex items-center">
+      <p className="mt-6 z-10 text-[#77767A] font-medium text-sm md:text-xl flex items-center">
         Press
         <span className="flex gap-2 justify-center mx-2 w-[80px] md:w-[120px] py-2.5 bg-[#E2E1EC] rounded-lg font-bold text-[#45464E]">
           Enter <img src={arrowEnter} />
@@ -85,7 +87,7 @@ function StepTwo({
         on the keyboard to search
       </p>
 
-      <div className="absolute bottom-4 flex w-full justify-center">
+      <div className="z-10 absolute bottom-4 flex w-full justify-center">
         <div
           onClick={() => setStep(1)}
           className="bg-[#F1F0FA] p-2 rounded-xl flex items-center gap-4"

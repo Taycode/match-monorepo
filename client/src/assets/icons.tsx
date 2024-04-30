@@ -1,5 +1,25 @@
 import { SVGAttributes } from "react";
 
+export function Bars3BottomRightIcon(props: SVGAttributes<SVGElement>) {
+  return (
+    <svg
+      {...props}
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function EyeIcon(props: SVGAttributes<SVGElement>) {
   return (
     <svg
@@ -232,6 +252,26 @@ export function UserIcon(props: SVGAttributes<SVGElement>) {
       <path
         d="M12.8097 10.6127C10.7172 9.21766 7.30473 9.21766 5.19723 10.6127C4.24473 11.2502 3.71973 12.1127 3.71973 13.0352C3.71973 13.9577 4.24473 14.8127 5.18973 15.4427C6.23973 16.1477 7.61973 16.5002 8.99973 16.5002C10.3797 16.5002 11.7597 16.1477 12.8097 15.4427C13.7547 14.8052 14.2797 13.9502 14.2797 13.0202C14.2722 12.0977 13.7547 11.2427 12.8097 10.6127Z"
         fill={props.fill || "#ACAAAE"}
+      />
+    </svg>
+  );
+}
+
+export function XCircleIcon(props: SVGAttributes<SVGElement>) {
+  return (
+    <svg
+      {...props}
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

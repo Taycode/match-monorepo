@@ -6,7 +6,10 @@ import vector from "../../assets/home/Vector.svg";
 
 function HowItWorks() {
   return (
-    <div id="how-it-works" className="px-12 py-20 max-w-screen-2xl mx-auto">
+    <div
+      id="how-it-works"
+      className="px-4 md:px-6 lg:px-12 py-2 md:py-20 max-w-screen-2xl mx-auto"
+    >
       <div className="relative w-[270px] h-[75px] flex items-center justify-center">
         <img src={vector} alt="" className="absolute bottom-2 left-2" />
         <h2 className="font-semibold text-black text-2xl">How Haya Works</h2>
@@ -18,8 +21,8 @@ function HowItWorks() {
       </div>
 
       <div className="mt-6 flex flex-col gap-4 w-full">
-        <div className="bg-[#F1F0FA] rounded-2xl relative flex items-center justify-between overflow-hidden h-[438px] px-8 py-4">
-          <h4 className="absolute top-[8%] -left-4 text-[12rem] text-[#E2E1EC] font-bold">
+        <div className="bg-[#F1F0FA] rounded-2xl relative flex flex-col lg:flex-row gap-4 lg:items-center justify-between overflow-hidden lg:h-[438px] px-8 py-4">
+          <h4 className="absolute -top-12 lg:top-[8%] -left-4 text-[12rem] text-[#E2E1EC] font-bold">
             1
           </h4>
           <div className="max-w-[500px] z-10">
@@ -34,10 +37,10 @@ function HowItWorks() {
               Request access
             </button>
           </div>
-          <img src={home} alt="" className="" />
+          <img src={home} alt="" className="z-10" />
         </div>
-        <div className="bg-[#F1F0FA] rounded-2xl relative flex items-center justify-between overflow-hidden h-[438px] px-8 py-4">
-          <h4 className="absolute top-[8%] -left-4 text-[12rem] text-[#E2E1EC] font-bold">
+        <div className="bg-[#F1F0FA] rounded-2xl relative flex flex-col lg:flex-row gap-4 lg:items-center justify-between overflow-hidden lg:h-[438px] px-8 py-4">
+          <h4 className="absolute -top-12 lg:top-[8%] -left-4 text-[12rem] text-[#E2E1EC] font-bold">
             2
           </h4>
           <div className="max-w-[500px] z-10">
@@ -52,10 +55,10 @@ function HowItWorks() {
               Request access
             </button>
           </div>
-          <img src={signin} alt="" className="" />
+          <img src={signin} alt="" className="z-10" />
         </div>
-        <div className="bg-[#F1F0FA] rounded-2xl relative flex items-center justify-between overflow-hidden h-[438px] px-8">
-          <h4 className="absolute top-[8%] -left-4 text-[12rem] text-[#E2E1EC] font-bold">
+        <div className="bg-[#F1F0FA] rounded-2xl relative flex flex-col lg:flex-row gap-4 lg:items-center justify-between overflow-hidden lg:h-[438px] px-8 py-4">
+          <h4 className="absolute -top-12 lg:top-[8%] -left-4 text-[12rem] text-[#E2E1EC] font-bold">
             3
           </h4>
           <div className="max-w-[500px] z-10">
@@ -70,10 +73,10 @@ function HowItWorks() {
               Request access
             </button>
           </div>
-          <img src={searchengine} alt="" className="h-[90%]" />
+          <img src={searchengine} alt="" className="h-[90%] z-10" />
         </div>
-        <div className="bg-[#F1F0FA] rounded-2xl relative flex items-center justify-between overflow-hidden h-[438px] px-8">
-          <h4 className="absolute top-[8%] -left-4 text-[12rem] text-[#E2E1EC] font-bold">
+        <div className="bg-[#F1F0FA] rounded-2xl relative flex flex-col lg:flex-row gap-4 lg:items-center justify-between overflow-hidden lg:h-[438px] px-8 py-4">
+          <h4 className="absolute -top-12 lg:top-[8%] -left-4 text-[12rem] text-[#E2E1EC] font-bold">
             4
           </h4>
           <div className="max-w-[500px] z-10">
@@ -88,7 +91,7 @@ function HowItWorks() {
               Request access
             </button>
           </div>
-          <img src={search} alt="" className="h-[90%]" />
+          <img src={search} alt="" className="h-[90%] z-10" />
         </div>
       </div>
     </div>

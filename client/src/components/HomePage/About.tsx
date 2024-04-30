@@ -6,8 +6,8 @@ import subscribehaya from "../../assets/home/subscribehaya.png";
 
 function About() {
   return (
-    <div id="about" className="px-12 py-20">
-      <div className="max-w-screen-2xl mx-auto flex justify-between gap-12 pb-20">
+    <div id="about" className="px-4 md:px-8 lg:px-12 py-12 md:py-20">
+      <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-12 pb-20">
         <div className="flex flex-col gap-4 max-w-[505px] overflow-hidden">
           <div className="relative w-[200px] h-[75px] flex items-center justify-center">
             <img src={vector} alt="" className="absolute bottom-2 left-2" />
@@ -18,7 +18,7 @@ function About() {
               className="absolute top-2 right-2 rotate-180"
             />
           </div>
-          <div className="flex flex-col gap-2 text-black">
+          <div className="flex flex-col gap-2 text-black text-justify lg:text-left">
             <p className="font-satoshi">
               At Haya, we're passionate about bridging the gap between companies
               and tech talents across the country.
@@ -51,7 +51,7 @@ function About() {
         <img
           src={aboutcard}
           alt=""
-          className="w-full h-[650px] -mt-28 select-none"
+          className="w-full max-h-[650px] lg:-mt-28 select-none"
         />
       </div>
 
@@ -59,28 +59,28 @@ function About() {
         style={{
           backgroundImage: `url(${gridlines})`,
         }}
-        className="bg-no-repeat bg-center max-w-screen-2xl mx-auto h-[300px] flex items-center justify-center overflow-hidden rounded-3xl bg-[#4E5B92] relative"
+        className="bg-no-repeat bg-center max-w-screen-2xl px-4 mx-auto h-[200px] md:h-[300px] flex items-center justify-center overflow-hidden rounded-3xl bg-[#4E5B92] relative"
       >
         <img
           src={subscribehaya}
           alt=""
           className="absolute bottom-0 right-0 select-none"
         />
-        <div className="flex flex-col items-center w-1/2 mx-auto">
-          <h3 className="font-semibold text-[#FBF8FF] text-2xl">
+        <div className="flex flex-col items-center z-10 lg:w-1/2 mx-auto">
+          <h3 className="font-semibold text-[#FBF8FF] text-lg md:text-2xl">
             Get Exclusive Access To Haya
           </h3>
-          <p className="text-[#FBF8FF] mt-2 font-satoshi font-medium">
+          <p className="text-[#FBF8FF] text-sm md:text-base text-center mt-2 font-satoshi font-medium">
             Submit your email address to request exclusive access to the Haya
             search engine
           </p>
           <div className="mt-6 flex justify-between gap-2 w-full">
             <input
               type="email"
-              className="bg-[#FEFBFF] min-w-[70%] grow rounded-xl text-black placeholder:text-[#ABAAB4] font-satoshi text-sm font-medium p-4 outline-none"
+              className="bg-[#FEFBFF] min-w-[60%] md:min-w-[70%] grow rounded-xl text-black placeholder:text-[#ABAAB4] font-satoshi text-sm font-medium p-4 outline-none"
               placeholder="Enter email address"
             />
-            <button className="bg-[#06D0FF] text-[#000C39] font-satoshi font-medium text-sm p-4 rounded-xl">
+            <button className="bg-[#06D0FF] text-[#000C39] font-satoshi font-medium text-xs md:text-sm p-2 md:p-4 rounded-xl">
               Submit email
             </button>
           </div>

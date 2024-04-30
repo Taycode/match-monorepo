@@ -6,8 +6,8 @@ import sprinkle from "../../assets/home/sprinkle.svg";
 
 function Footer() {
   return (
-    <div className="max-w-screen-2xl mx-auto pb-20 px-12">
-      <div className="bg-[#F1F0FA] rounded-3xl py-4 px-8 flex flex-col gap-16 relative overflow-hidden">
+    <div className="max-w-screen-2xl mx-auto pb-12 md:pb-20 px-4 md:px-8 lg:px-12">
+      <div className="bg-[#F1F0FA] rounded-3xl py-4 px-4 md:px-6 lg:px-8 flex flex-col gap-16 relative overflow-hidden">
         <img
           src={sprinkle}
           alt="sprinkle"
@@ -19,23 +19,32 @@ function Footer() {
           className="absolute -bottom-[60%] left-[50%]"
         />
         <img src={sprinkle} alt="sprinkle" className="absolute top-0 right-0" />
-        <div className="flex justify-between items-center z-10">
+        <div className="flex flex-wrap md:flex-nowrap justify-center gap-4 md:gap-0 md:justify-between items-center z-10">
           <a href="/">
             <img src={footerhaya} alt="haya" />
           </a>
-          <ul className="flex items-center gap-x-8">
+          <ul className="flex items-center gap-4 lg:gap-8">
             <li>
-              <a href="/#about" className="font-medium text-[#1A1B21]">
+              <a
+                href="/#about"
+                className="font-medium text-[#1A1B21] text-sm lg:text-base"
+              >
                 About Haya
               </a>
             </li>
             <li>
-              <a href="/#how-it-works" className="font-medium text-[#1A1B21]">
+              <a
+                href="/#how-it-works"
+                className="font-medium text-[#1A1B21] text-sm lg:text-base"
+              >
                 How Haya Works
               </a>
             </li>
             <li>
-              <a href="/#faqs" className="font-medium text-[#1A1B21]">
+              <a
+                href="/#faqs"
+                className="font-medium text-[#1A1B21] text-sm lg:text-base"
+              >
                 FAQs
               </a>
             </li>
@@ -51,7 +60,7 @@ function Footer() {
             </button>
           </div>
         </div>
-        <div className="flex justify-between items-center z-10">
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center z-10">
           <ul className="flex items-center gap-x-8">
             <li>
               <a href="#">

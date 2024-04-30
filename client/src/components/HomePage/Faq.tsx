@@ -40,7 +40,7 @@ function Faq() {
 
   return (
     <div
-      className="max-w-screen-2xl mx-auto px-12 py-20 flex justify-between gap-24"
+      className="max-w-screen-2xl mx-auto px-12 py-12 md:py-20 flex justify-center lg:justify-between gap-24"
       id="faqs"
     >
       <div className="min-w-3/5 grow flex flex-col">
@@ -54,7 +54,7 @@ function Faq() {
           />
         ))}
       </div>
-      <img src={faqCard} alt="faq card" className="hidden md:block" />
+      <img src={faqCard} alt="faq card" className="hidden lg:block" />
     </div>
   );
 }

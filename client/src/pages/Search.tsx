@@ -68,7 +68,7 @@ function Search() {
   }, [currentModal]);
 
   return (
-    <div className="bg-[#E2E1EC] w-screen h-screen overflow-x-hidden">
+    <div className="bg-[#FBF8FF] w-screen h-screen overflow-x-hidden">
       {currentModal && <ModalLayout />}
       <div className="max-w-screen-2xl min-h-[80vh] mx-auto p-4 md:p-8">
         <SearchHeader searchText={searchText} setSearchText={setSearchText} />
