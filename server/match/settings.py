@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "django_elasticsearch_dsl_drf",
     "users",
     "talents",
+    'postings.apps.PostingsConfig',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -154,3 +156,8 @@ ELASTICSEARCH_INDEX_NAMES = {
     'talents.documents': 'talents',
 }
 OPENAPI_API_KEY = os.environ.get('OPENAI_API_KEY')
+TWITTER_BEARER_TOKEN = os.environ.get('TWITTER_BEARER_TOKEN')
+TWITTER_ACCESS_TOKEN = os.environ.get('TWITTER_ACCESS_TOKEN')
+TWITTER_ACCESS_TOKEN_SECRET = os.environ.get('TWITTER_ACCESS_TOKEN_SECRET')
+TWITTER_API_KEY = os.environ.get('TWITTER_API_KEY')
+TWITTER_API_KEY_SECRET = os.environ.get('TWITTER_API_KEY_SECRET')

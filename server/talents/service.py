@@ -23,7 +23,12 @@ class TalentService:
     @staticmethod
     def process_keyword(query: str) -> ParsedResponse:
         message = TalentService.build_completion_message(query)
-        response = OpenAPIClient.query(message)
+        response = OpenAPIClient.query_for_json(
+            "You are a helpful assistant that can access external functions. You only "
+            "answer in JSON as you are part of an existing strict code base. Not "
+            "apllicable fields can be set to null.",
+            message
+        )
         try:
             filter_data = json.loads(response.content)
             role = filter_data.get('role')
