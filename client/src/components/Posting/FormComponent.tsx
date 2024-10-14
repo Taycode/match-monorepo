@@ -39,7 +39,7 @@ const FormComponent: React.FC = () => {
         setLoading(true);
 
         try {
-            const apiResponse = await axios.post<ResponseData>('http://127.0.0.1:8000/posting/create', formData);
+            const apiResponse = await axios.post<ResponseData>('https://server-ts4i.onrender.com/posting/create', formData);
             setResponse(apiResponse.data);
         } catch (error) {
             console.error('Error submitting the form:', error);
