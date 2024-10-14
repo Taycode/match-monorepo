@@ -44,13 +44,18 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     'rest_framework.authtoken',
+    "corsheaders",
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
     "users",
     "talents",
+    'postings.apps.PostingsConfig',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -138,6 +143,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = 'users.CustomUser'
 
 
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
@@ -154,3 +163,8 @@ ELASTICSEARCH_INDEX_NAMES = {
     'talents.documents': 'talents',
 }
 OPENAPI_API_KEY = os.environ.get('OPENAI_API_KEY')
+TWITTER_BEARER_TOKEN = os.environ.get('TWITTER_BEARER_TOKEN')
+TWITTER_ACCESS_TOKEN = os.environ.get('TWITTER_ACCESS_TOKEN')
+TWITTER_ACCESS_TOKEN_SECRET = os.environ.get('TWITTER_ACCESS_TOKEN_SECRET')
+TWITTER_API_KEY = os.environ.get('TWITTER_API_KEY')
+TWITTER_API_KEY_SECRET = os.environ.get('TWITTER_API_KEY_SECRET')
