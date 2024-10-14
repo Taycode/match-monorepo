@@ -45,7 +45,7 @@ class OpenAPIClient:
                 {"role": "system", "content": prompt},
                 {'role': 'user', 'content': message}
             ],
-            max_tokens=256,
+            max_tokens=70,
             n=1,
             stop=None
         )
