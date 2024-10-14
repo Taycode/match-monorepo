@@ -15,7 +15,7 @@ class OpenAPIClient:
         return OpenAPIClient.client
 
     @staticmethod
-    def query(message: str):
+    def query_for_json(prompt: str, message: str):
         client = OpenAPIClient.build_client()
         response = client.chat.completions.create(
             model='gpt-3.5-turbo',
@@ -24,7 +24,7 @@ class OpenAPIClient:
                 "type": "json_object", 
             },
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that can access external functions. You only answer in JSON as you are part of an existing strict code base. Not apllicable fields can be set to null."},
+                {"role": "system", "content": prompt},
                 {'role': 'user', 'content': message}
             ],
             tools=TOOLS,
@@ -35,3 +35,19 @@ class OpenAPIClient:
         )
         # Ensure the response structure is as expected; the path to the message might need adjustments
         return response.choices[0].message.model_dump()['tool_calls'][0]['function']['arguments']
+
+    @staticmethod
+    def query(prompt: str, message: str):
+        client = OpenAPIClient.build_client()
+        response = client.chat.completions.create(
+            model='gpt-3.5-turbo',
+            messages=[
+                {"role": "system", "content": prompt},
+                {'role': 'user', 'content': message}
+            ],
+            max_tokens=256,
+            n=1,
+            stop=None
+        )
+        # Ensure the response structure is as expected; the path to the message might need adjustments
+        return response.choices[0].message
