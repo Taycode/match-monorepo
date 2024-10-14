@@ -9,7 +9,7 @@ interface FormData {
 
 interface SuccessResponse {
     message: string;
-    data: any;
+    data: unknown;
 }
 
 interface ErrorResponse {
@@ -24,7 +24,6 @@ const FormComponent: React.FC = () => {
         post: ''
     });
     const [loading, setLoading] = useState<boolean>(false);
-    const [response, setResponse] = useState<ResponseData | null>(null);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -39,11 +38,9 @@ const FormComponent: React.FC = () => {
         setLoading(true);
 
         try {
-            const apiResponse = await axios.post<ResponseData>('https://server-ts4i.onrender.com/posting/create', formData);
-            setResponse(apiResponse.data);
+            await axios.post<ResponseData>('https://server-ts4i.onrender.com/posting/create', formData);
         } catch (error) {
             console.error('Error submitting the form:', error);
-            setResponse({ error: 'An error occurred while submitting the form' });
         } finally {
             setLoading(false);
         }
