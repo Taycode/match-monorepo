@@ -18,7 +18,7 @@ class OpenAPIClient:
     def query_for_json(prompt: str, message: str):
         client = OpenAPIClient.build_client()
         response = client.chat.completions.create(
-            model='gpt-3.5-turbo',
+            model='gpt-4o-mini',
             temperature=0.1,
             response_format={
                 "type": "json_object", 
@@ -40,7 +40,7 @@ class OpenAPIClient:
     def query(prompt: str, message: str):
         client = OpenAPIClient.build_client()
         response = client.chat.completions.create(
-            model='gpt-3.5-turbo',
+            model='gpt-4o-mini',
             messages=[
                 {"role": "system", "content": prompt},
                 {'role': 'user', 'content': message}
