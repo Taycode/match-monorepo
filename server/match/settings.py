@@ -47,9 +47,9 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
+    'postings.apps.PostingsConfig',
     "users",
     "talents",
-    'postings.apps.PostingsConfig',
     'drf_yasg'
 ]
 
