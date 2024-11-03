@@ -1,28 +1,31 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, {useState, ChangeEvent, FormEvent, Dispatch, SetStateAction} from 'react';
 import axios from 'axios';
-import './FormComponent.css'; // Import CSS for styling
+import './FormComponent.css';
+import {PostingStage} from "./LLMResponseSelector/posting-stage.enum.ts";
+import {showErrorToast, showSuccessToast} from "../../utils/toastUtils.ts"; // Import CSS for styling
+
 
 interface FormData {
     source: string;
     post: string;
+    selectedResponse: string;
+    editedResponse: string;
 }
 
-interface SuccessResponse {
-    message: string;
-    data: unknown;
+interface FormComponentProps {
+    onReceiveResponses: Dispatch<SetStateAction<string[]>>;
+    updatePostingStage: Dispatch<SetStateAction<PostingStage>>;
+    setFormData: Dispatch<SetStateAction<FormData>>;
+    formData: FormData;
 }
 
-interface ErrorResponse {
-    error: string;
-}
 
-type ResponseData = SuccessResponse | ErrorResponse;
 
-const FormComponent: React.FC = () => {
-    const [formData, setFormData] = useState<FormData>({
-        source: '',
-        post: ''
-    });
+// interface SuccessResponse {
+//    responses: string[]
+// }
+
+const FormComponent: React.FC<FormComponentProps> = ({ onReceiveResponses, updatePostingStage, setFormData, formData }) => {
     const [loading, setLoading] = useState<boolean>(false);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -38,9 +41,14 @@ const FormComponent: React.FC = () => {
         setLoading(true);
 
         try {
-            await axios.post<ResponseData>('https://server-ts4i.onrender.com/posting/create', formData);
+            const response = await axios.post('https://server-ts4i.onrender.com/posting/initiate', formData);
+            showSuccessToast('Responses generated successfully');
+            const {responses} = response.data;
+            onReceiveResponses(responses)
+            updatePostingStage(PostingStage.SELECT_RESPONSE)
         } catch (error) {
             console.error('Error submitting the form:', error);
+            showErrorToast(String(error));
         } finally {
             setLoading(false);
         }

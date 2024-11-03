@@ -2,6 +2,7 @@ from openai import OpenAI
 from django.conf import settings
 from .schemas import TOOLS
 
+
 #
 class OpenAPIClient:
     client = None
@@ -21,7 +22,7 @@ class OpenAPIClient:
             model='gpt-4o-mini',
             temperature=0.1,
             response_format={
-                "type": "json_object", 
+                "type": "json_object",
             },
             messages=[
                 {"role": "system", "content": prompt},
@@ -37,7 +38,7 @@ class OpenAPIClient:
         return response.choices[0].message.model_dump()['tool_calls'][0]['function']['arguments']
 
     @staticmethod
-    def query(prompt: str, message: str):
+    def query(prompt: str, message: str, number_of_responses: int = 1):
         client = OpenAPIClient.build_client()
         response = client.chat.completions.create(
             model='gpt-4o-mini',
@@ -45,8 +46,8 @@ class OpenAPIClient:
                 {"role": "system", "content": prompt},
                 {'role': 'user', 'content': message}
             ],
-            n=1,
+            n=number_of_responses,
             stop=None
         )
         # Ensure the response structure is as expected; the path to the message might need adjustments
-        return response.choices[0].message
+        return response
