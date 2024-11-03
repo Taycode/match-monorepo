@@ -7,10 +7,13 @@ import Search from "./pages/Search.tsx";
 import SearchEngine from "./pages/SearchEngine.tsx";
 import SignIn from "./pages/SignIn.tsx";
 import { Posting } from "./pages/Posting.tsx";
+import {ToastContainer} from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
+        <ToastContainer/>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/search" element={<Search />} />

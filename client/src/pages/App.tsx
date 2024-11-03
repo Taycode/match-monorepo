@@ -8,7 +8,7 @@ import Navbar from "../components/HomePage/Navbar";
 function App() {
   return (
     <div className="bg-[#FBF8FF] h-screen">
-      <Navbar />
+        <Navbar />
       <Hero />
       <About />
       <HowItWorks />

@@ -1,7 +1,8 @@
 import React, {useState, ChangeEvent, FormEvent, Dispatch, SetStateAction} from 'react';
 import axios from 'axios';
 import './FormComponent.css';
-import {PostingStage} from "./LLMResponseSelector/posting-stage.enum.ts"; // Import CSS for styling
+import {PostingStage} from "./LLMResponseSelector/posting-stage.enum.ts";
+import {showErrorToast, showSuccessToast} from "../../utils/toastUtils.ts"; // Import CSS for styling
 
 
 interface FormData {
@@ -40,12 +41,14 @@ const FormComponent: React.FC<FormComponentProps> = ({ onReceiveResponses, updat
         setLoading(true);
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/posting/initiate', formData);
+            const response = await axios.post('https://server-ts4i.onrender.com/posting/initiate', formData);
+            showSuccessToast('Responses generated successfully');
             const {responses} = response.data;
             onReceiveResponses(responses)
             updatePostingStage(PostingStage.SELECT_RESPONSE)
         } catch (error) {
             console.error('Error submitting the form:', error);
+            showErrorToast(String(error));
         } finally {
             setLoading(false);
         }

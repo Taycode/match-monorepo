@@ -4,6 +4,7 @@ import {LLMResponseSelector} from "../components/Posting/LLMResponseSelector/LLM
 import {PostingStage} from "../components/Posting/LLMResponseSelector/posting-stage.enum.ts";
 import {EditResponseComponent} from "../components/Posting/EditResponseComponent/EditResponseComponent.tsx";
 import axios from "axios";
+import {showErrorToast, showSuccessToast} from "../utils/toastUtils.ts";
 
 interface FormData {
     source: string;
@@ -34,7 +35,8 @@ function Posting() {
                 editedTweet: editedResponse,
             }
             console.log(requestData)
-            await axios.post('http://127.0.0.1:8000/posting/create', requestData);
+            await axios.post('https://server-ts4i.onrender.com/posting/create', requestData);
+            showSuccessToast('Post sent successfully');
             setFormData({
                 source: '',
                 post: '',
@@ -46,6 +48,7 @@ function Posting() {
             setPostingStage(PostingStage.INITIATE_POST)
         } catch (error) {
             console.error('Error submitting the form:', error);
+            showErrorToast(String(error));
         } finally {
             setLoading(false);
         }
