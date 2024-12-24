@@ -54,7 +54,11 @@ function Faq() {
           />
         ))}
       </div>
-      <img src={faqCard} alt="faq card" className="hidden lg:block" />
+      <img
+        src={faqCard}
+        alt="faq card"
+        className="hidden lg:block select-none"
+      />
     </div>
   );
 }

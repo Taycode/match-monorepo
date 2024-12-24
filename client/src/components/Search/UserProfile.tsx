@@ -59,7 +59,7 @@ function UserProfile({
             <div className="p-4 flex flex-col gap-3 w-full">
               <div className="flex items-center flex-wrap justify-between gap-2">
                 <a
-                  href={talent.email}
+                  href={`mailto:${talent.email}`}
                   target="_blank"
                   className="flex items-center gap-1 py-2 px-4 bg-[#F1F0FA] rounded-lg font-satoshi text-[#05164B] text-xs lg:text-sm lg:font-medium"
                 >

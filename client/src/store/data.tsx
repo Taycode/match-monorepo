@@ -19,11 +19,12 @@ export type TalentType = {
 export const TALENTS: TalentType[] = [
   {
     id: 1,
-    name: "John Doe",
-    profilePicture: "https://100k-faces.glitch.me/random-image",
+    name: "Tairu Abdulmateen",
+    profilePicture:
+      "https://media.licdn.com/dms/image/v2/D5603AQHW_vd1KzJiPQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1715642302893?e=1740614400&v=beta&t=qEILjAJB9FGaxpcCNIShq2cDdpIMZ6rtpiudcLBtj98",
     expertise: "Full Stack Developer",
     experience: 5,
-    score: 7.5,
+    score: 9,
     description:
       "I am a full stack developer with 5 years of experience. I have worked on a number of projects and have a good understanding of the tech stack.",
     email: "test1@gmail.com",
@@ -45,8 +46,8 @@ export const TALENTS: TalentType[] = [
     score: 8.2,
     description:
       "I am a frontend developer with 3 years of experience. I have worked on a number of projects and have a good understanding of the tech stack.",
-    email: "test2@gmail.com",
-    website: "https://www.test2.com",
+    email: "afolabiibrahim08@@gmail.com",
+    website: "https://asta-otaku.vercel.app/",
     twitter: "https://www.twitter.com/test2",
     linkedin: "https://www.linkedin.com/test2",
     programmingLanguages: ["Javascript", "Typescript"],
@@ -75,7 +76,7 @@ export const TALENTS: TalentType[] = [
     id: 4,
     name: "Fathiu Olayemi",
     profilePicture:
-      "https://media.licdn.com/dms/image/D4D03AQEEiFIfQF4ZUQ/profile-displayphoto-shrink_800_800/0/1673228471628?e=1718236800&v=beta&t=cmjbbesPE8xledNUI2dPuAOR_AsEVLFgX2_v9jC-33k",
+      "https://media.licdn.com/dms/image/v2/D4D03AQEEiFIfQF4ZUQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1673228471628?e=1740614400&v=beta&t=NqSndiavglQDgsXaplCowGO25FHtzHjOBX2JNMCLbcQ",
     expertise: "Brand Designer",
     experience: 6,
     score: 9.1,
@@ -111,7 +112,7 @@ export const TALENTS: TalentType[] = [
     id: 6,
     name: "Fawaz Shobogun",
     profilePicture:
-      "https://media.licdn.com/dms/image/D4D03AQHFL6Kc_Hq0SA/profile-displayphoto-shrink_800_800/0/1684461474844?e=1718236800&v=beta&t=97EX65w826muAU0zhTMykE4iUiPOucbjZ3NPke4GMQ8",
+      "https://media.licdn.com/dms/image/v2/D4D03AQHlQj9Mb_0jfA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1713919672667?e=1740614400&v=beta&t=AxgMfAcFYiSjIhts81PNyAeMnBkzvpr43eXxUsu4yzw",
     expertise: "UI/UX Designer",
     experience: 4,
     score: 9.4,
@@ -129,7 +130,7 @@ export const TALENTS: TalentType[] = [
     id: 7,
     name: "AbdulMalik Bello",
     profilePicture:
-      "https://media.licdn.com/dms/image/C5603AQH7XFb4sECzVg/profile-displayphoto-shrink_800_800/0/1593295359584?e=1718236800&v=beta&t=s-fRAPl-HGfoMfn0aWnoPCCHMFMytiwROtwwWE251MM",
+      "https://media.licdn.com/dms/image/v2/C5603AQH7XFb4sECzVg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1593295359584?e=1740614400&v=beta&t=t9MRl8gYteWfWN-plXwxn3qTLG413veZ8I6W5ZJQ0Cs",
     expertise: "Data Scientist",
     experience: 5,
     score: 8.7,

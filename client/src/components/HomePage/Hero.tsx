@@ -14,8 +14,11 @@ import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
 
-// import required modules
+// Swiper modules
 import { EffectCoverflow, Pagination } from "swiper/modules";
+
+// Hero images
+const HERO_IMAGES = [heroone, herotwo, herothree, herofour, herofive, herosix];
 
 function Hero() {
   return (
@@ -25,6 +28,7 @@ function Hero() {
       }}
       className="bg-no-repeat bg-cover bg-center pb-12 md:pb-20"
     >
+      {/* Header Section */}
       <div className="max-w-screen-2xl px-4 md:px-8 lg:px-12 mx-auto w-full pb-6 md:pb-20">
         <h2 className="text-[#1A1B21] my-6 md:my-0 font-bold text-center lg:text-left text-3xl md:text-5xl lg:text-7xl py-3">
           Meet Your Tech Talent Match
@@ -44,24 +48,22 @@ function Hero() {
           <img src={rqA} alt="Request Access" />
         </button>
       </div>
+
+      {/* Swiper Section */}
       <div className="max-w-screen-2xl w-full px-4 md:px-0 mx-auto relative overflow-hidden select-none">
+        {/* Ellipse Decorations */}
         <img
           src={ellipse}
-          alt=""
+          alt="Top Ellipse"
           className="absolute -top-[22%] lg:-top-[45%] left-0 right-0 z-10"
         />
         <Swiper
-          effect={"coverflow"}
-          grabCursor={true}
-          // centeredSlides={true}
+          effect="coverflow"
+          grabCursor
           slidesPerView={1}
           breakpoints={{
-            768: {
-              slidesPerView: 2,
-            },
-            1024: {
-              slidesPerView: 4,
-            },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 4 },
           }}
           coverflowEffect={{
             rotate: 40,
@@ -70,32 +72,23 @@ function Hero() {
             modifier: 1,
             slideShadows: true,
           }}
-          pagination={true}
+          pagination
           modules={[EffectCoverflow, Pagination]}
           className="h-[300px] md:h-[320px] bg-[#FBF8FF] w-full"
         >
-          <SwiperSlide>
-            <img src={heroone} alt="" className="w-full h-full" />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img src={herotwo} alt="" className="w-full h-full" />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img src={herothree} alt="" className="w-full h-full" />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img src={herofour} alt="" className="w-full h-full" />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img src={herofive} alt="" className="w-full h-full" />
-          </SwiperSlide>
-          <SwiperSlide>
-            <img src={herosix} alt="" className="w-full h-full" />
-          </SwiperSlide>
+          {HERO_IMAGES.map((image, index) => (
+            <SwiperSlide key={index}>
+              <img
+                src={image}
+                alt={`Hero ${index + 1}`}
+                className="w-full h-full"
+              />
+            </SwiperSlide>
+          ))}
         </Swiper>
         <img
           src={ellipse}
-          alt=""
+          alt="Bottom Ellipse"
           className="absolute -bottom-[22%] lg:-bottom-[45%] left-0 right-0 z-10"
         />
       </div>
