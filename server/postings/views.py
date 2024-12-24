@@ -13,6 +13,11 @@ class CreatePostingView(generics.CreateAPIView):
     serializer_class = PostingSerializer
 
 
+class RetrievePostingView(generics.RetrieveAPIView):
+    queryset = Posting.objects.all()
+    serializer_class = PostingSerializer
+
+
 class InitiatePostingView(APIView):
     serializer_class = InitiatePostingSerializer
 
