@@ -1,13 +1,58 @@
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
-from talents.documents import TalentDocument
+# from talents.documents import TalentDocument
 from talents.filter_backend import KeywordParserFilterBackend
-from talents.serializers import TalentDocumentSerializer
+from talents.models import Talent
+from talents.serializers import TalentPoolSerializer
+from rest_framework.generics import CreateAPIView
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+
+#
+# class TalentDocumentViewSet(BaseDocumentViewSet):
+#     document = TalentDocument
+#     serializer_class = TalentDocumentSerializer
+#     pagination_class = PageNumberPagination
+#     lookup_field = 'id'
+#     filter_backends = (KeywordParserFilterBackend, )
 
 
-class TalentDocumentViewSet(BaseDocumentViewSet):
-    document = TalentDocument
-    serializer_class = TalentDocumentSerializer
-    pagination_class = PageNumberPagination
-    lookup_field = 'id'
-    filter_backends = (KeywordParserFilterBackend, )
+class AddToTalentPoolViewSet(CreateAPIView):
+    queryset = Talent.objects.all()
+    serializer_class = TalentPoolSerializer
+    parser_classes = [MultiPartParser, FormParser]  # To handle multipart/form-data
+
+    @swagger_auto_schema(
+        operation_description="Endpoint to add a talent to the pool with multipart/form-data.",
+        consumes=["multipart/form-data"],  # Explicitly set content type
+        manual_parameters=[
+            openapi.Parameter(
+                'first_name', openapi.IN_FORM, description='First name of the talent', type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'last_name', openapi.IN_FORM, description='Last name of the talent', type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'role', openapi.IN_FORM, description='Role of the talent', type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'phone_number', openapi.IN_FORM, description='Phone number of the talent', type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'email', openapi.IN_FORM, description='Email address of the talent', type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'years_of_experience', openapi.IN_FORM, description='Years of experience', type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'resume_file', openapi.IN_FORM, description='Resume file to upload', type=openapi.TYPE_FILE
+            ),
+        ],
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=201)
