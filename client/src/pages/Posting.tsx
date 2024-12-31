@@ -36,7 +36,6 @@ function Posting() {
         generatedTweet: selectedResponse,
         editedTweet: editedResponse,
       };
-      console.log(requestData);
       await axios.post(
         "https://server-ts4i.onrender.com/posting/create",
         requestData
