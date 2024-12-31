@@ -1,6 +1,7 @@
 import { useState, ChangeEvent, FormEvent, DragEvent } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { BASE_URL } from "../utils";
 
 const TalentPoolForm = () => {
   const [formData, setFormData] = useState({
@@ -118,7 +119,7 @@ const TalentPoolForm = () => {
       });
 
       const response = await axios.post(
-        "https://server-ts4i.onrender.com/talents/add-to-pool",
+        `${BASE_URL}/talents/add-to-pool`,
         form,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import gridlines from "../assets/grid-layer.png";
 import logo from "../assets/logo.svg";
+import { BASE_URL } from "../utils";
 
 interface Post {
   id: string;
@@ -26,9 +27,7 @@ const PostDetails = () => {
   const fetchPostDetails = async (postId: string) => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        `https://server-ts4i.onrender.com/posting/view/${postId}`
-      );
+      const res = await axios.get(`${BASE_URL}/posting/view/${postId}`);
       setSelectedPost(res.data);
     } catch (err) {
       setError("Error fetching post details.");

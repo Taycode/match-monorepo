@@ -11,6 +11,7 @@ import { PostingStage } from "./LLMResponseSelector/posting-stage.enum.ts";
 import { showErrorToast, showSuccessToast } from "../../utils/toastUtils.ts";
 import gridlines from "../../assets/grid-layer.png";
 import logo from "../../assets/logo.svg";
+import { BASE_URL } from "../../utils/index.tsx";
 
 interface FormData {
   source: string;
@@ -54,7 +55,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
 
     try {
       const response = await axios.post(
-        "https://server-ts4i.onrender.com/posting/initiate",
+        `${BASE_URL}/posting/initiate`,
         formData
       );
       showSuccessToast("Responses generated successfully");
