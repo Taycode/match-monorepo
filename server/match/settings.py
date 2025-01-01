@@ -47,8 +47,6 @@ INSTALLED_APPS = [
     "rest_framework",
     'rest_framework.authtoken',
     "corsheaders",
-    "django_elasticsearch_dsl",
-    "django_elasticsearch_dsl_drf",
     'postings.apps.PostingsConfig',
     "users",
     "talents",
@@ -94,15 +92,7 @@ DATABASES = {
     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
 
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': os.environ.get('ELASTICSEARCH_URL'),
-        'http_auth': (
-            os.environ.get('ELASTICSEARCH_USERNAME', ''),
-            os.environ.get('ELASTICSEARCH_PASSWORD', '')
-        )
-    }
-}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -175,9 +165,7 @@ cloudinary.config(
     api_secret=CLOUDINARY['api_secret'],
 )
 
-ELASTICSEARCH_INDEX_NAMES = {
-    # 'talents.documents': 'talents',
-}
+
 OPENAPI_API_KEY = os.environ.get('OPENAI_API_KEY')
 TWITTER_BEARER_TOKEN = os.environ.get('TWITTER_BEARER_TOKEN')
 TWITTER_ACCESS_TOKEN = os.environ.get('TWITTER_ACCESS_TOKEN')
