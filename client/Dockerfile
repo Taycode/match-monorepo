@@ -17,6 +17,12 @@ RUN npm install
 # Copy the rest of your app's source code from your host to your image filesystem.
 COPY . .
 
+# Add ARG to accept build-time variables
+ARG VITE_API_URL
+
+# Set the environment variable for the build process
+ENV VITE_API_URL=${VITE_API_URL}
+
 # Build the application using TypeScript and Vite
 RUN npm run build
 # If using yarn, you might use:
