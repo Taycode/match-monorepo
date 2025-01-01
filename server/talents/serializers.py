@@ -1,24 +1,6 @@
-from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 from rest_framework import serializers
 from .models import Talent
-# from talents.documents import TalentDocument
 import cloudinary.uploader
-
-
-# class TalentDocumentSerializer(DocumentSerializer):
-#     """Serializer for the talent document"""
-#
-#     class Meta:
-#         """Meta options."""
-#
-#         document = TalentDocument
-#
-#         fields = (
-#             'id',
-#             'skills',
-#             'role',
-#             'years_of_experience'
-#         )
 
 
 class TalentPoolSerializer(serializers.ModelSerializer):
