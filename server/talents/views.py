@@ -5,6 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 
 class AddToTalentPoolViewSet(CreateAPIView):
@@ -41,6 +42,14 @@ class AddToTalentPoolViewSet(CreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=201)
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=201)
+        except ValidationError as err:
+            return Response({
+                "errors": err.detail,
+                "message": "Validation error"
+            },
+                status=422
+            )
