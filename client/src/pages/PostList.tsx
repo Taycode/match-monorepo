@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import gridlines from "../assets/grid-layer.png";
 import logo from "../assets/logo.svg";
@@ -13,10 +13,10 @@ interface Post {
 
 const PostDetails = () => {
   const { id } = useParams<{ id?: string }>();
-
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -49,6 +49,11 @@ const PostDetails = () => {
     </div>
   );
 
+  const truncateText = (text: string) => {
+    const lines = text.split("\n").slice(0, 8);
+    return lines.join("\n");
+  };
+
   return (
     <div
       style={{ backgroundImage: `url(${gridlines})` }}
@@ -72,7 +77,17 @@ const PostDetails = () => {
           <div className="space-y-8">
             <div className="prose max-w-none">
               <div className="rounded-xl md:p-6 leading-relaxed whitespace-pre-wrap text-lg">
-                {selectedPost.post}
+                {isExpanded
+                  ? selectedPost.post
+                  : truncateText(selectedPost.post)}
+                {selectedPost.post.split("\n").length > 8 && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="mt-4 text-primary hover:text-primary/80 font-medium transition-colors"
+                  >
+                    {isExpanded ? "Read Less" : "Read More"}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -85,8 +100,22 @@ const PostDetails = () => {
                   rel="noopener noreferrer"
                   className="text-primary hover:text-primary/80 transition-colors break-all"
                 >
-                  {selectedPost.source}
+                  {new URL(selectedPost.source).hostname}
                 </a>
+              </div>
+            </div>
+
+            <div className="border-t pt-6 mt-8">
+              <div className="text-center space-y-4">
+                <p className="text-gray-700">
+                  Want to be part of our talented community?
+                </p>
+                <Link
+                  to="/talent-pool"
+                  className="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Join Our Talent Pool
+                </Link>
               </div>
             </div>
           </div>
