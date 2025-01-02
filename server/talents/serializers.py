@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Talent
 import cloudinary.uploader
+from rest_framework.exceptions import ValidationError
 
 
 class TalentPoolSerializer(serializers.ModelSerializer):
@@ -22,6 +23,9 @@ class TalentPoolSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Extract the file and other data
+        email = validated_data.get('email')
+        if Talent.objects.filter(email=email).exists():
+            raise ValidationError({"email": "A talent with this email already exists."})
         file = validated_data.pop('resume_file')
         # Upload the file to Cloudinary
         result = cloudinary.uploader.upload(file, resource_type="raw")
