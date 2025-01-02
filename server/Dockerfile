@@ -8,14 +8,27 @@ WORKDIR /code
 ADD . /code
 ENV PYTHONUNBUFFERED=1
 
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="/root/.local/bin:$PATH"
+
+# Configure Poetry to create a virtual environment inside the container
+RUN poetry config virtualenvs.in-project true
+
+# Install dependencies using Poetry
+RUN poetry install --no-interaction --no-ansi
+
+# Set the Poetry virtual environment's path
+ENV VENV_PATH="/code/.venv"
+
+# Activate the virtual environment and ensure it's used for the app
+ENV PATH="$VENV_PATH/bin:$PATH"
+
 # Set default port using an environment variable
 ENV PORT=8000
 
-# Expose the port dynamically (the port exposed here is more for documentation as the actual exposure happens at runtime)
+# Expose the port dynamically
 EXPOSE $PORT
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Use an ENTRYPOINT to use the environment variable
 ENTRYPOINT ["sh", "-c", "python manage.py runserver 0.0.0.0:$PORT"]

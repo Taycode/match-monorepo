@@ -1,7 +1,3 @@
-from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
-from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
-# from talents.documents import TalentDocument
-from talents.filter_backend import KeywordParserFilterBackend
 from talents.models import Talent
 from talents.serializers import TalentPoolSerializer
 from rest_framework.generics import CreateAPIView
@@ -9,14 +5,6 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-
-#
-# class TalentDocumentViewSet(BaseDocumentViewSet):
-#     document = TalentDocument
-#     serializer_class = TalentDocumentSerializer
-#     pagination_class = PageNumberPagination
-#     lookup_field = 'id'
-#     filter_backends = (KeywordParserFilterBackend, )
 
 
 class AddToTalentPoolViewSet(CreateAPIView):
