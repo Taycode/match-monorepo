@@ -1,6 +1,5 @@
 from openai import OpenAI
 from django.conf import settings
-from .schemas import TOOLS
 
 
 #
@@ -16,7 +15,7 @@ class OpenAPIClient:
         return OpenAPIClient.client
 
     @staticmethod
-    def query_for_json(prompt: str, message: str):
+    def query_for_json(prompt: str, message: str, schema: list):
         client = OpenAPIClient.build_client()
         response = client.chat.completions.create(
             model='gpt-4o-mini',
@@ -28,7 +27,7 @@ class OpenAPIClient:
                 {"role": "system", "content": prompt},
                 {'role': 'user', 'content': message}
             ],
-            tools=TOOLS,
+            tools=schema,
             tool_choice="auto",
             max_tokens=256,
             n=1,
