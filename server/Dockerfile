@@ -30,5 +30,5 @@ ENV PORT=8000
 # Expose the port dynamically
 EXPOSE $PORT
 
-# Use an ENTRYPOINT to use the environment variable
-ENTRYPOINT ["sh", "-c", "python manage.py runserver 0.0.0.0:$PORT"]
+# Default entrypoint script to apply migrations and start the server
+ENTRYPOINT ["sh", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:$PORT"]
