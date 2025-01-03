@@ -1,9 +1,12 @@
 import json
 
+from common.utils.document_reader import DocumentReader
 from openai_client.client import OpenAPIClient
 from talents.dataclass import ParsedResumeResponse
 from openai_client.schemas.resume_skills_parser import TOOLS as RESUME_SKILLS_PARSER_SCHEMA
-
+from talents.models import Talent
+from vector.service import VectorManager
+from dataclasses import asdict
 
 # class TalentService:
 #     @staticmethod
@@ -84,4 +87,28 @@ def parse_talent_skills(resume_text: str):
         role=role,
         skills=skills,
         years_of_experience=years_of_experience
+    )
+
+
+def post_process_new_talent(talent: Talent):
+    """"
+    This processes new talents added to the pool to enable proper search when job matching
+
+    It follows the following steps
+    1. Parse role and skills and store in DB
+    2. Upsert data into pinecone
+    """
+    document_reader = DocumentReader()
+    resume_text = document_reader.read_document(talent.resume_url)
+    parsed_resume_response = parse_talent_skills(resume_text)
+    talent.parsed_role = parsed_resume_response.role
+    talent.skills = parsed_resume_response.skills
+    talent.parsed_years_of_experience = parsed_resume_response.years_of_experience
+    talent.save()
+
+    vector_manager = VectorManager('haya-talents')
+    vector_manager.add_text_to_index(
+        unique_id=str(talent.id),
+        text=resume_text,
+        metadata=asdict(parsed_resume_response)
     )
