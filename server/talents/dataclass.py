@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ParsedResponse:
+class ParsedResumeResponse:
     role: str
     skills: list
-    years_of_experience: dict
+    years_of_experience: int
