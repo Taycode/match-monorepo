@@ -13,10 +13,11 @@ import os
 from pathlib import Path
 
 import dj_database_url
-
+import structlog
 from dotenv import load_dotenv
 import cloudinary
 import cloudinary.uploader
+from match.logger import configure_logging
 
 # Load environment variables from .env file
 load_dotenv()
@@ -33,9 +34,16 @@ SECRET_KEY = "django-insecure-o14c)*s*&06lq+6nr@%-p(2+5&$=mz599x3d3yik9@0&l9!5w2
 ENVIRONMENT = os.environ.get('ENVIRONMENT')
 ISDEV = ENVIRONMENT == 'development'
 
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+LOG_FORMAT = "json" if ENVIRONMENT == "production" else "console"
+configure_logging(env=ENVIRONMENT, log_format=LOG_FORMAT)
+
+
+logger = structlog.get_logger(__name__)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ISDEV
-
 ALLOWED_HOSTS = ['*']
 
 # Application definition
