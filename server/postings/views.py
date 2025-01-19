@@ -4,9 +4,10 @@ from .pagination import PostingCursorPagination
 from .serializers import PostingSerializer, InitiatePostingSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, serializers
 import structlog
 from .services import generate_tweet_content_for_posting, trigger_post_on_twitter
+from djangorestframework_camel_case.parser import CamelCaseJSONParser
 
 logger = structlog.get_logger(__name__)
 
@@ -14,12 +15,15 @@ logger = structlog.get_logger(__name__)
 class CreatePostingView(generics.CreateAPIView):
     queryset = Posting.objects.all()
     serializer_class = PostingSerializer
+    parser_classes = [CamelCaseJSONParser]
 
     def post(self, request, *args, **kwargs):
         try:
             instance = super().post(request, *args, **kwargs)
             trigger_post_on_twitter(instance)
             return instance
+        except serializers.ValidationError as e:
+            raise e
         except Exception as e:
             logger.error("Error posting tweet on twitter", exc=e)
             return Response({
