@@ -3,7 +3,6 @@ name = "server"
 version = "0.1.0"
 description = "Haya server"
 authors = ["Abdulmateen Tairu <tay2druh@gmail.com>"]
-readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
