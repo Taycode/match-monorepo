@@ -16,7 +16,7 @@ ENV PATH="/root/.local/bin:$PATH"
 RUN poetry config virtualenvs.in-project true
 
 # Install dependencies using Poetry
-RUN poetry install --no-interaction --no-ansi
+RUN poetry install --no-interaction --no-ansi --no-root
 
 # Set the Poetry virtual environment's path
 ENV VENV_PATH="/code/.venv"
