@@ -17,18 +17,29 @@ class CreatePostingView(generics.CreateAPIView):
     serializer_class = PostingSerializer
     parser_classes = [CamelCaseJSONParser]
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
+        """
+        We override `create` to add custom error handling/logging.
+        Note that `super().create(...)` returns a `Response`, not the instance.
+        """
         try:
-            instance = super().post(request, *args, **kwargs)
-            trigger_post_on_twitter(instance)
-            return instance
+            return super().create(request, *args, **kwargs)
         except serializers.ValidationError as e:
-            raise e
+            # Re-raise validation errors to return the usual 400 response
+            raise e from e
         except Exception as e:
-            logger.error("Error posting tweet on twitter", exc=e)
-            return Response({
-                'message': 'An error occurred'
-            }, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Log any unexpected error and return a generic 500
+            logger.error("Error creating Posting or posting tweet on Twitter", exc_info=e)
+            return Response({'message': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def perform_create(self, serializer):
+        """
+        This is where the actual instance is created.
+        We call `serializer.save()` to create the object,
+        then run `trigger_post_on_twitter(...)` with the newly created instance.
+        """
+        instance = serializer.save()
+        trigger_post_on_twitter(instance)
 
 
 class RetrievePostingView(generics.RetrieveAPIView):
