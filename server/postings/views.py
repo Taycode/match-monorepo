@@ -27,9 +27,9 @@ class CreatePostingView(generics.CreateAPIView):
         except serializers.ValidationError as e:
             # Re-raise validation errors to return the usual 400 response
             raise e from e
-        except Exception as e:
+        except Exception:
             # Log any unexpected error and return a generic 500
-            logger.error("Error creating Posting or posting tweet on Twitter", exc_info=e)
+            logger.exception("Error creating Posting or posting tweet on Twitter")
             return Response({'message': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def perform_create(self, serializer):

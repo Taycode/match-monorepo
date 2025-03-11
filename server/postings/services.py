@@ -37,11 +37,9 @@ def generate_tweet_for_posting(posting: Posting):
 
 
 def generate_tweet_content_for_posting(posting_dict: dict[str, str], number_of_choices: int):
-    prompt = """I have a stringified JSON object that contains a job posting with a 'text' field and an optional 
-    'source' field (which may be a URL or empty). Summarize the 'text' field into a concise version that is no longer 
+    prompt = """I have a stringified JSON object that contains a job posting with a 'text' field. Summarize the 'text' field into a concise version that is no longer 
     than 250 characters, focusing on key details like the job title, company name, location (if applicable), 
-    and qualifications. If the 'source' field contains a URL, append it at the end of the summary. If the 'source' 
-    field is empty, leave it out."""
+    and qualifications."""
     input_data = json.dumps(posting_dict)
     query_response = OpenAPIClient.query(
         prompt,
@@ -53,4 +51,7 @@ def generate_tweet_content_for_posting(posting_dict: dict[str, str], number_of_c
 
 
 def trigger_post_on_twitter(posting: Posting):
-    post_tweet(posting.edited_tweet or posting.generated_tweet)
+    tweet = posting.edited_tweet or posting.generated_tweet
+    posting_url = settings.CLIENT_APP_URL + f'/post/{posting.id}'
+    tweet = tweet + f' Link: {posting_url}'
+    post_tweet(tweet)
