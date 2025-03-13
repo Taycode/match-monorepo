@@ -4,6 +4,7 @@ import axios from "axios";
 import gridlines from "../assets/grid-layer.png";
 import logo from "../assets/logo.svg";
 import { BASE_URL } from "../utils";
+import { Helmet } from "react-helmet";
 
 interface Post {
   id: string;
@@ -55,73 +56,93 @@ const PostDetails = () => {
   };
 
   return (
-    <div
-      style={{ backgroundImage: `url(${gridlines})` }}
-      className="w-screen min-h-screen flex justify-center items-center bg-[#E2E1EC] bg-cover bg-no-repeat bg-center p-4"
-    >
-      <a
-        href="/"
-        className="absolute text-center top-6 md:left-20 mb-4 md:mb-0"
-      >
-        <img src={logo} alt="logo" />
-      </a>
+      <>
+          <Helmet>
+              {/* Basic tags */}
+              <title>{selectedPost?.title}</title>
+              <meta name="description" content={selectedPost?.description} />
 
-      <div className="bg-white shadow-xl rounded-2xl p-8 max-w-2xl w-full md:mx-4 my-20 md:my-12">
-        {loading ? (
-          <SkeletonLoader />
-        ) : error ? (
-          <div className="bg-red-50 border-l-4 border-red-500 md:p-4 rounded-lg">
-            <p className="text-red-700">{error}</p>
+              {/* Open Graph meta tags */}
+              <meta property="og:title" content={selectedPost?.title} />
+              <meta property="og:description" content={post.description} />
+              <meta property="og:image" content={post.image} />
+              <meta property="og:url" content={`https://yoursite.com/posts/${post.id}`} />
+              <meta property="og:type" content="article" />
+
+              {/* Twitter Card meta tags */}
+              <meta name="twitter:card" content="summary_large_image" />
+              <meta name="twitter:title" content={post.title} />
+              <meta name="twitter:description" content={post.description} />
+              <meta name="twitter:image" content={post.image} />
+          </Helmet>
+          <div
+              style={{ backgroundImage: `url(${gridlines})` }}
+              className="w-screen min-h-screen flex justify-center items-center bg-[#E2E1EC] bg-cover bg-no-repeat bg-center p-4"
+          >
+              <a
+                  href="/"
+                  className="absolute text-center top-6 md:left-20 mb-4 md:mb-0"
+              >
+                  <img src={logo} alt="logo" />
+              </a>
+
+              <div className="bg-white shadow-xl rounded-2xl p-8 max-w-2xl w-full md:mx-4 my-20 md:my-12">
+                  {loading ? (
+                      <SkeletonLoader />
+                  ) : error ? (
+                      <div className="bg-red-50 border-l-4 border-red-500 md:p-4 rounded-lg">
+                          <p className="text-red-700">{error}</p>
+                      </div>
+                  ) : selectedPost ? (
+                      <div className="space-y-8">
+                          <div className="prose max-w-none">
+                              <div className="rounded-xl md:p-6 leading-relaxed whitespace-pre-wrap text-lg">
+                                  {isExpanded
+                                      ? selectedPost.post
+                                      : truncateText(selectedPost.post)}
+                                  {selectedPost.post.split("\n").length > 8 && (
+                                      <button
+                                          onClick={() => setIsExpanded(!isExpanded)}
+                                          className="mt-4 text-primary hover:text-primary/80 font-medium transition-colors"
+                                      >
+                                          {isExpanded ? "Read Less" : "Read More"}
+                                      </button>
+                                  )}
+                              </div>
+                          </div>
+
+                          <div className="border-t pt-6">
+                              <div className="flex flex-col space-y-2">
+                                  <span className="text-sm text-gray-500">Source</span>
+                                  <a
+                                      href={selectedPost.source}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-primary hover:text-primary/80 transition-colors break-all"
+                                  >
+                                      {new URL(selectedPost.source).hostname}
+                                  </a>
+                              </div>
+                          </div>
+
+                          <div className="border-t pt-6 mt-8">
+                              <div className="text-center space-y-4">
+                                  <p className="text-gray-700">
+                                      Want to be part of our talented community?
+                                  </p>
+                                  <Link
+                                      to="/talent-pool"
+                                      className="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                                  >
+                                      Join Our Talent Pool
+                                  </Link>
+                              </div>
+                          </div>
+                      </div>
+                  ) : null}
+              </div>
           </div>
-        ) : selectedPost ? (
-          <div className="space-y-8">
-            <div className="prose max-w-none">
-              <div className="rounded-xl md:p-6 leading-relaxed whitespace-pre-wrap text-lg">
-                {isExpanded
-                  ? selectedPost.post
-                  : truncateText(selectedPost.post)}
-                {selectedPost.post.split("\n").length > 8 && (
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-4 text-primary hover:text-primary/80 font-medium transition-colors"
-                  >
-                    {isExpanded ? "Read Less" : "Read More"}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t pt-6">
-              <div className="flex flex-col space-y-2">
-                <span className="text-sm text-gray-500">Source</span>
-                <a
-                  href={selectedPost.source}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:text-primary/80 transition-colors break-all"
-                >
-                  {new URL(selectedPost.source).hostname}
-                </a>
-              </div>
-            </div>
-
-            <div className="border-t pt-6 mt-8">
-              <div className="text-center space-y-4">
-                <p className="text-gray-700">
-                  Want to be part of our talented community?
-                </p>
-                <Link
-                  to="/talent-pool"
-                  className="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  Join Our Talent Pool
-                </Link>
-              </div>
-            </div>
-          </div>
-        ) : null}
-      </div>
-    </div>
+      </>
   );
 };
 
