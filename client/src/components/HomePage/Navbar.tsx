@@ -34,6 +34,14 @@ function Navbar() {
               FAQs
             </a>
           </li>
+          <li>
+            <a
+              href="/jobs"
+              className="font-medium text-[#1A1B21] bg-[#FBF8FF]"
+            >
+              Job Postings
+            </a>
+          </li>
         </ul>
         <a href="/" className="z-10">
           <img src={logo} alt="logo" />
@@ -44,9 +52,11 @@ function Navbar() {
               Login
             </button>
           </a>
-          <button className="bg-primary rounded-xl z-10 py-3 font-satoshi text-sm text-white font-medium w-[120px]">
-            Request Access
-          </button>
+          <a href="/create-job" className="z-10">
+            <button className="bg-primary rounded-xl py-3 font-satoshi text-sm text-white font-medium w-[120px]">
+              Post Job
+            </button>
+          </a>
         </div>
       </header>
       <nav className="flex md:hidden relative justify-between items-center px-2 py-4">
@@ -75,7 +85,13 @@ function Navbar() {
                 <a href="/#faqs">FAQs</a>
               </li>
               <li>
+                <a href="/jobs">Job Postings</a>
+              </li>
+              <li>
                 <a href="/signin">Login</a>
+              </li>
+              <li>
+                <a href="/create-job">Post Job</a>
               </li>
             </ul>
           )}

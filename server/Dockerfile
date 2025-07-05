@@ -1,34 +1,40 @@
 # Use an official Python runtime as a parent image
-FROM python:3.11-bullseye
+FROM python:3.11-slim
 
-# Set the working directory in the container to /code
-WORKDIR /code
-
-# Copy the current directory contents into the container at /code
-ADD . /code
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="/root/.local/bin:$PATH"
+# Set work directory
+WORKDIR /code
 
-# Configure Poetry to create a virtual environment inside the container
-RUN poetry config virtualenvs.in-project true
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+        netcat-traditional \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies using Poetry
-RUN poetry install --no-interaction --no-ansi --no-root
+# Copy requirements first for better caching
+COPY pyproject.toml poetry.lock* ./
 
-# Set the Poetry virtual environment's path
-ENV VENV_PATH="/code/.venv"
+# Install Python dependencies using pip (more reliable than Poetry in Docker)
+RUN pip install --upgrade pip \
+    && pip install poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --only=main --no-interaction --no-ansi --no-root \
+    && pip uninstall poetry -y
 
-# Activate the virtual environment and ensure it's used for the app
-ENV PATH="$VENV_PATH/bin:$PATH"
+# Copy project
+COPY . .
 
-# Set default port using an environment variable
-ENV PORT=8000
+# Create entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Expose the port dynamically
-EXPOSE $PORT
+# Expose port
+EXPOSE 8000
 
-# Default entrypoint script to apply migrations and start the server
-ENTRYPOINT ["sh", "-c", "poetry run python manage.py migrate && poetry run python manage.py runserver 0.0.0.0:$PORT"]
+# Use entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]
