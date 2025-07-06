@@ -4,7 +4,7 @@ from .views import (
     CreatePostingView, InitiatePostingView, RetrievePostingView, ListPostingView,
     # New MVP job posting views
     CreateJobView, ListJobsView, JobDetailView, JobMatchesView,
-    ShortlistCandidateView, RefreshMatchesView, JobStatsView
+    ShortlistCandidateView, RefreshMatchesView, JobStatsView, SyncFormResponsesView
 )
 
 urlpatterns = [
@@ -21,5 +21,6 @@ urlpatterns = [
     path('jobs/<str:job_id>/matches/', JobMatchesView.as_view(), name='job_matches'),
     path('jobs/<str:job_id>/refresh-matches/', RefreshMatchesView.as_view(), name='refresh_matches'),
     path('jobs/<str:job_id>/stats/', JobStatsView.as_view(), name='job_stats'),
+    path('jobs/<str:job_id>/sync-responses/', SyncFormResponsesView.as_view(), name='sync_form_responses'),
     path('matches/<str:match_id>/shortlist/', ShortlistCandidateView.as_view(), name='shortlist_candidate'),
 ]

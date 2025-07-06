@@ -13,7 +13,7 @@ from .serializers import (
     JobSerializer, CreateJobSerializer, MatchSerializer
 )
 from .services import generate_tweet_content_for_posting, trigger_post_on_twitter
-from .job_services import create_job_with_automations, match_candidates_for_job
+from .job_services import create_job_with_automations, match_candidates_for_job, sync_form_responses
 
 logger = structlog.get_logger(__name__)
 
@@ -284,4 +284,49 @@ class JobStatsView(APIView):
             logger.error(f"Error getting stats for job {job_id}: {str(e)}")
             return Response({
                 'error': 'Failed to get job stats'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SyncFormResponsesView(APIView):
+    """
+    Sync form responses from Google Sheets for a specific job
+    """
+    def post(self, request, job_id):
+        try:
+            job = Job.objects.get(id=job_id)
+            
+            if not job.google_sheet_id:
+                return Response({
+                    'error': 'Job has no Google Sheet configured'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Sync responses from Google Sheets
+            new_responses = sync_form_responses(job_id)
+            
+            # Re-run matching if new responses were found
+            if new_responses > 0:
+                matches = match_candidates_for_job(job_id)
+                
+                return Response({
+                    'job_id': job_id,
+                    'new_responses': new_responses,
+                    'matches_updated': len(matches),
+                    'message': f'Synced {new_responses} new responses and updated matches'
+                })
+            else:
+                return Response({
+                    'job_id': job_id,
+                    'new_responses': 0,
+                    'message': 'No new responses found'
+                })
+                
+        except Job.DoesNotExist:
+            return Response({
+                'error': 'Job not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error syncing form responses for job {job_id}: {str(e)}")
+            return Response({
+                'error': 'Failed to sync form responses',
+                'details': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

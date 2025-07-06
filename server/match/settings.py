@@ -185,3 +185,9 @@ TWITTER_API_KEY = os.environ.get('TWITTER_API_KEY')
 TWITTER_API_KEY_SECRET = os.environ.get('TWITTER_API_KEY_SECRET')
 PINECONE_API_KEY = os.environ.get('PINECONE_API_KEY')
 CLIENT_APP_URL = os.environ.get('CLIENT_APP_URL')
+
+# Google API Settings
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+GOOGLE_REFRESH_TOKEN = os.environ.get('GOOGLE_REFRESH_TOKEN')
+GOOGLE_CREDENTIALS_FILE = os.environ.get('GOOGLE_CREDENTIALS_FILE')  # Path to service account JSON file

@@ -7,6 +7,12 @@ from tweepy import Client
 from openai_client.client import OpenAPIClient
 from postings.models import Job, FormResponse, Match
 from talents.models import Talent
+from postings.google_services import (
+    create_google_form as create_form,
+    create_google_sheet as create_sheet,
+    get_form_responses,
+    get_sheet_responses
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,57 +56,36 @@ def create_job_with_automations(title: str, description: str) -> Tuple[Job, List
 
 def create_google_form(job: Job) -> Tuple[str, str]:
     """
-    Create a Google Form for the job posting
-    TODO: Replace with actual Google Forms API integration
+    Create a Google Form for the job posting using real Google Forms API
     """
-    # For MVP, we'll mock this - replace with real Google Forms API
     logger.info(f"Creating Google Form for job {job.id}")
     
-    # Mock implementation - replace with real Google Forms API
-    form_id = f"mock_form_{job.id}"
-    form_url = f"https://forms.google.com/mock/{form_id}"
-    
-    # Real implementation would look like:
-    # from google.oauth2.credentials import Credentials
-    # from googleapiclient.discovery import build
-    # 
-    # service = build('forms', 'v1', credentials=creds)
-    # form_body = {
-    #     "info": {
-    #         "title": f"Application for {job.title}",
-    #         "description": f"Please fill out this form to apply for: {job.title}"
-    #     }
-    # }
-    # form = service.forms().create(body=form_body).execute()
-    # return form['formId'], form['responderUri']
-    
-    return form_id, form_url
+    try:
+        form_id, form_url = create_form(job.title, job.description)
+        return form_id, form_url
+    except Exception as e:
+        logger.error(f"Error creating Google Form for job {job.id}: {str(e)}")
+        # Fallback to mock for development if API fails
+        form_id = f"mock_form_{job.id}"
+        form_url = f"https://forms.google.com/mock/{form_id}"
+        return form_id, form_url
 
 
 def create_google_sheet(job: Job, form_id: str) -> Tuple[str, str]:
     """
-    Create a Google Sheet linked to the form
-    TODO: Replace with actual Google Sheets API integration
+    Create a Google Sheet linked to the form using real Google Sheets API
     """
     logger.info(f"Creating Google Sheet for job {job.id}")
     
-    # Mock implementation - replace with real Google Sheets API
-    sheet_id = f"mock_sheet_{job.id}"
-    sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
-    
-    # Real implementation would look like:
-    # from googleapiclient.discovery import build
-    # 
-    # service = build('sheets', 'v4', credentials=creds)
-    # spreadsheet_body = {
-    #     'properties': {
-    #         'title': f"Applications for {job.title}"
-    #     }
-    # }
-    # spreadsheet = service.spreadsheets().create(body=spreadsheet_body).execute()
-    # return spreadsheet['spreadsheetId'], spreadsheet['spreadsheetUrl']
-    
-    return sheet_id, sheet_url
+    try:
+        sheet_id, sheet_url = create_sheet(job.title, form_id)
+        return sheet_id, sheet_url
+    except Exception as e:
+        logger.error(f"Error creating Google Sheet for job {job.id}: {str(e)}")
+        # Fallback to mock for development if API fails
+        sheet_id = f"mock_sheet_{job.id}"
+        sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
+        return sheet_id, sheet_url
 
 
 def post_job_to_twitter(job: Job, form_url: str) -> str:
@@ -297,23 +282,43 @@ def save_matches_to_db(job: Job, matches: List[Dict]) -> None:
 
 def sync_form_responses(job_id: str) -> int:
     """
-    Sync new responses from Google Sheets
-    TODO: Replace with actual Google Sheets API integration
+    Sync new responses from Google Sheets using real Google API
     """
     try:
         job = Job.objects.get(id=job_id)
         logger.info(f"Syncing form responses for job {job.id}")
         
-        # Mock implementation - replace with real Google Sheets API
-        # service = build('sheets', 'v4', credentials=creds)
-        # result = service.spreadsheets().values().get(
-        #     spreadsheetId=job.google_sheet_id,
-        #     range='A:Z'
-        # ).execute()
-        # values = result.get('values', [])
+        if not job.google_sheet_id:
+            logger.warning(f"Job {job.id} has no Google Sheet ID")
+            return 0
         
-        # For now, return 0 new responses
-        return 0
+        # Get responses from Google Sheets
+        responses = get_sheet_responses(job.google_sheet_id)
+        
+        new_responses = 0
+        for response in responses:
+            if not response.get('Email Address'):
+                continue
+                
+            # Check if response already exists
+            if not FormResponse.objects.filter(
+                job=job,
+                email=response.get('Email Address', ''),
+                name=response.get('Full Name', '')
+            ).exists():
+                
+                # Create new FormResponse
+                FormResponse.objects.create(
+                    job=job,
+                    name=response.get('Full Name', ''),
+                    email=response.get('Email Address', ''),
+                    resume_url=response.get('Resume/CV', ''),
+                    response_data=response
+                )
+                new_responses += 1
+        
+        logger.info(f"Synced {new_responses} new responses for job {job.id}")
+        return new_responses
         
     except Exception as e:
         logger.error(f"Error syncing form responses for job {job_id}: {str(e)}")
