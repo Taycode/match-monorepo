@@ -15,6 +15,7 @@ import TalentPool from "./pages/TalentPool.tsx";
 import CreateJob from "./pages/CreateJob.tsx";
 import JobList from "./pages/JobList.tsx";
 import JobMatches from "./pages/JobMatches.tsx";
+import JobDetails from "./pages/JobDetails.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -32,6 +33,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         {/* MVP Job Posting Routes */}
         <Route path="/jobs" element={<JobList />} />
         <Route path="/create-job" element={<CreateJob />} />
+        <Route path="/jobs/:jobId" element={<JobDetails />} />
         <Route path="/jobs/:jobId/matches" element={<JobMatches />} />
         
         <Route path="*" element={<NotFound />} />

@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 from typing import List, Dict, Any, Tuple
 from django.conf import settings
 
@@ -7,6 +8,7 @@ from tweepy import Client
 from openai_client.client import OpenAPIClient
 from postings.models import Job, FormResponse, Match
 from talents.models import Talent
+from vector.service import VectorManager
 from postings.google_services import (
     create_google_form as create_form,
     create_google_sheet as create_sheet,
@@ -15,6 +17,39 @@ from postings.google_services import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def cosine_similarity(vector1: List[float], vector2: List[float]) -> float:
+    """
+    Calculate cosine similarity between two vectors
+    """
+    if len(vector1) != len(vector2):
+        logger.warning(f"Vector length mismatch: {len(vector1)} vs {len(vector2)}")
+        return 0.0
+    
+    # Handle zero vectors
+    if not any(vector1) or not any(vector2):
+        return 0.0
+    
+    # Calculate dot product
+    dot_product = sum(a * b for a, b in zip(vector1, vector2))
+    
+    # Calculate magnitudes
+    magnitude1 = math.sqrt(sum(a * a for a in vector1))
+    magnitude2 = math.sqrt(sum(b * b for b in vector2))
+    
+    # Avoid division by zero
+    if magnitude1 == 0 or magnitude2 == 0:
+        return 0.0
+    
+    # Calculate cosine similarity
+    similarity = dot_product / (magnitude1 * magnitude2)
+    
+    # Clamp to [-1, 1] range and convert to [0, 1] range
+    similarity = max(-1.0, min(1.0, similarity))
+    similarity = (similarity + 1.0) / 2.0  # Convert from [-1,1] to [0,1]
+    
+    return similarity
 
 
 def create_job_with_automations(title: str, description: str) -> Tuple[Job, List[Dict]]:
@@ -174,95 +209,310 @@ def match_candidates_for_job(job_id: str) -> List[Dict]:
 
 def get_text_embedding(text: str) -> List[float]:
     """
-    Get OpenAI embedding for text
-    TODO: Replace with actual OpenAI embeddings API
+    Get OpenAI embedding for text using real OpenAI API
     """
     try:
-        # Mock implementation - replace with real OpenAI embeddings
-        # response = openai.Embedding.create(
-        #     model="text-embedding-3-small",
-        #     input=text
-        # )
-        # return response['data'][0]['embedding']
-        
-        # Return mock embedding for now
-        return [0.1] * 1536  # text-embedding-3-small returns 1536 dimensions
+        # Use the real OpenAI embeddings API
+        embedding = OpenAPIClient.get_embedding(text)
+        logger.debug(f"Generated embedding of length {len(embedding)} for text: {text[:50]}...")
+        return embedding
         
     except Exception as e:
-        logger.error(f"Error getting embedding: {str(e)}")
+        logger.error(f"Error getting embedding for text '{text[:50]}...': {str(e)}")
+        # Return zero vector as fallback
         return [0.0] * 1536
 
 
 def match_talent_pool(job: Job, job_embedding: List[float]) -> List[Dict]:
     """
-    Match candidates from existing talent pool
+    Match candidates from existing talent pool using Pinecone vector search
     """
     matches = []
-    talents = Talent.objects.all()
+    
+    try:
+        # Use existing Pinecone index for talents
+        vector_manager = VectorManager('haya-talents', create_index=False)
+        
+        # Create job text for searching
+        job_text = f"{job.title} {job.description}"
+        
+        logger.info(f"Searching Pinecone for talent matches against job: {job.title}")
+        
+        # Search Pinecone for similar talent vectors (top 20 candidates)
+        search_results = vector_manager.search(job_text, top_k=20)
+        
+        logger.info(f"Found {len(search_results.matches)} potential matches from Pinecone")
+        
+        # Process Pinecone results
+        for match in search_results.matches:
+            try:
+                # Pinecone returns similarity scores (higher = more similar)
+                similarity_score = float(match.score)
+                talent_id = match.id
+                
+                # Apply threshold (Pinecone scores are typically 0-1, higher is better)
+                if similarity_score < 0.7:  # Adjust threshold for Pinecone scores
+                    continue
+                
+                # Fetch talent details from database
+                try:
+                    talent = Talent.objects.get(id=talent_id)
+                except Talent.DoesNotExist:
+                    logger.warning(f"Talent {talent_id} found in Pinecone but not in database")
+                    continue
+                
+                # Extract metadata from Pinecone (includes parsed resume data)
+                metadata = match.metadata or {}
+                
+                matches.append({
+                    'candidate_id': talent.id,
+                    'candidate_type': 'talent',
+                    'similarity_score': similarity_score,
+                    'candidate_data': {
+                        'name': f"{talent.first_name} {talent.last_name}",
+                        'email': talent.email,
+                        'resume_url': talent.resume_url,
+                        'skills': metadata.get('skills', talent.skills),
+                        'role': metadata.get('role', getattr(talent, 'role', '')),
+                        'parsed_role': metadata.get('role', getattr(talent, 'parsed_role', '')),
+                        'years_of_experience': metadata.get('years_of_experience', getattr(talent, 'parsed_years_of_experience', '')),
+                        'pinecone_metadata': metadata  # Include for debugging
+                    }
+                })
+                
+                logger.debug(f"Talent {talent.id} similarity: {similarity_score:.3f}")
+                
+            except Exception as e:
+                logger.error(f"Error processing Pinecone match {match.id}: {str(e)}")
+                continue
+        
+        # Sort by similarity score (already sorted by Pinecone, but ensure order)
+        sorted_matches = sorted(matches, key=lambda x: x['similarity_score'], reverse=True)
+        logger.info(f"Found {len(sorted_matches)} talent matches above threshold")
+        
+        return sorted_matches
+        
+    except Exception as e:
+        logger.error(f"Error searching Pinecone for talent matches: {str(e)}")
+        logger.info("Falling back to database search...")
+        
+                 # Fallback to simple database search if Pinecone fails
+        return []  # Return empty list if Pinecone fails
+
+
+def fallback_talent_search(job: Job, job_embedding: List[float]) -> List[Dict]:
+    """
+    Fallback talent search using database when Pinecone is unavailable
+    """
+    matches = []
+    talents = Talent.objects.all()[:10]  # Limit to avoid performance issues
+    
+    logger.info(f"Fallback: Searching {talents.count()} talents from database")
     
     for talent in talents:
-        # Get talent embedding
-        talent_text = f"{talent.role} {' '.join(talent.skills or [])}"
-        talent_embedding = get_text_embedding(talent_text)
-        
-        # Calculate similarity (mock for now)
-        similarity_score = calculate_similarity(job_embedding, talent_embedding)
-        
-        if similarity_score > 0.5:  # Threshold for matching
-            matches.append({
-                'candidate_id': talent.id,
-                'candidate_type': 'talent',
-                'similarity_score': similarity_score,
-                'candidate_data': {
-                    'name': f"{talent.first_name} {talent.last_name}",
-                    'email': talent.email,
-                    'resume_url': talent.resume_url,
-                    'skills': talent.skills,
-                }
-            })
-    
+        try:
+            # Simple talent text
+            talent_text = f"{getattr(talent, 'parsed_role', '')} {getattr(talent, 'skills', '')}"
+            
+            if not talent_text.strip():
+                continue
+                
+            talent_embedding = get_text_embedding(talent_text)
+            similarity_score = calculate_similarity(job_embedding, talent_embedding)
+            
+            if similarity_score > 0.5:
+                matches.append({
+                    'candidate_id': talent.id,
+                    'candidate_type': 'talent',
+                    'similarity_score': similarity_score,
+                    'candidate_data': {
+                        'name': f"{talent.first_name} {talent.last_name}",
+                        'email': talent.email,
+                        'resume_url': talent.resume_url,
+                        'skills': talent.skills,
+                    }
+                })
+        except Exception as e:
+            logger.error(f"Error in fallback search for talent {talent.id}: {str(e)}")
+            
     return sorted(matches, key=lambda x: x['similarity_score'], reverse=True)
 
 
 def match_form_responses(job: Job, job_embedding: List[float]) -> List[Dict]:
     """
-    Match candidates from form responses
+    Match candidates from form responses using Pinecone vector search where possible
     """
     matches = []
     form_responses = FormResponse.objects.filter(job=job)
     
-    for response in form_responses:
-        # Get response embedding
-        response_text = f"{response.name} {response.response_data.get('skills', '')}"
-        response_embedding = get_text_embedding(response_text)
-        
-        # Calculate similarity
-        similarity_score = calculate_similarity(job_embedding, response_embedding)
-        
-        if similarity_score > 0.5:  # Threshold for matching
-            matches.append({
-                'candidate_id': response.id,
-                'candidate_type': 'form_response',
-                'similarity_score': similarity_score,
-                'candidate_data': {
-                    'name': response.name,
-                    'email': response.email,
-                    'resume_url': response.resume_url,
-                    'skills': response.response_data.get('skills', []),
-                }
-            })
+    logger.info(f"Matching against {form_responses.count()} form responses")
     
-    return sorted(matches, key=lambda x: x['similarity_score'], reverse=True)
+    # For form responses, we'll store embeddings in Pinecone as we process them
+    # Since they're job-specific, we create embeddings on-demand but could cache them
+    
+    try:
+        # Try to use Pinecone for form responses (create index if needed)
+        vector_manager = VectorManager(f'job-{job.id}-responses', create_index=True)
+        
+        # First, ensure all form responses are in Pinecone
+        for response in form_responses:
+            if not response.vector_id:  # Not yet stored in Pinecone
+                add_form_response_to_pinecone(response, vector_manager)
+        
+        # Now search Pinecone for matches
+        job_text = f"{job.title} {job.description}"
+        search_results = vector_manager.search(job_text, top_k=20)
+        
+        logger.info(f"Found {len(search_results.matches)} form response matches from Pinecone")
+        
+        for match in search_results.matches:
+            try:
+                similarity_score = float(match.score)
+                response_id = match.id
+                
+                # Lower threshold for form responses (they applied specifically to this job)
+                if similarity_score < 0.6:
+                    continue
+                
+                # Fetch response details from database
+                try:
+                    response = FormResponse.objects.get(id=response_id)
+                except FormResponse.DoesNotExist:
+                    continue
+                
+                metadata = match.metadata or {}
+                
+                matches.append({
+                    'candidate_id': response.id,
+                    'candidate_type': 'form_response',
+                    'similarity_score': similarity_score,
+                    'candidate_data': {
+                        'name': response.name,
+                        'email': response.email,
+                        'resume_url': response.resume_url,
+                        'phone': response.response_data.get('Phone Number', ''),
+                        'years_of_experience': response.response_data.get('Years of Experience', ''),
+                        'cover_letter': response.response_data.get('Cover Letter', ''),
+                        'response_data': response.response_data,
+                        'pinecone_metadata': metadata
+                    }
+                })
+                
+                logger.debug(f"Form response {response.id} similarity: {similarity_score:.3f}")
+                
+            except Exception as e:
+                logger.error(f"Error processing form response match {match.id}: {str(e)}")
+                continue
+                
+    except Exception as e:
+        logger.error(f"Error using Pinecone for form responses: {str(e)}")
+        logger.info("Falling back to direct embedding comparison...")
+        
+        # Fallback: Direct embedding comparison (original method but limited)
+        matches = fallback_form_response_search(job, job_embedding, form_responses[:10])
+    
+    sorted_matches = sorted(matches, key=lambda x: x['similarity_score'], reverse=True)
+    logger.info(f"Found {len(sorted_matches)} form response matches above threshold")
+    
+    return sorted_matches
+
+
+def add_form_response_to_pinecone(response: FormResponse, vector_manager: VectorManager) -> str:
+    """
+    Add a form response to Pinecone vector database
+    """
+    try:
+        # Create comprehensive response text for embedding
+        response_text_parts = []
+        
+        # Add basic info
+        if response.name:
+            response_text_parts.append(f"Applicant: {response.name}")
+        
+        # Add years of experience from form
+        years_exp = response.response_data.get('Years of Experience', '')
+        if years_exp:
+            response_text_parts.append(f"Experience: {years_exp}")
+        
+        # Add cover letter content (truncated)
+        cover_letter = response.response_data.get('Cover Letter', '')
+        if cover_letter:
+            cover_letter = cover_letter[:500] + '...' if len(cover_letter) > 500 else cover_letter
+            response_text_parts.append(f"Cover Letter: {cover_letter}")
+        
+        # Combine all parts
+        response_text = ' | '.join(response_text_parts)
+        
+        if not response_text.strip():
+            return ""
+        
+        # Create metadata for Pinecone
+        metadata = {
+            'name': response.name,
+            'email': response.email,
+            'years_of_experience': response.response_data.get('Years of Experience', ''),
+            'job_id': str(response.job.id)
+        }
+        
+        # Add to Pinecone
+        vector_manager.add_text_to_index(
+            unique_id=str(response.id),
+            text=response_text,
+            metadata=metadata
+        )
+        
+        # Update the response with vector ID
+        response.vector_id = str(response.id)
+        response.save()
+        
+        logger.debug(f"Added form response {response.id} to Pinecone")
+        return str(response.id)
+        
+    except Exception as e:
+        logger.error(f"Error adding form response {response.id} to Pinecone: {str(e)}")
+        return ""
+
+
+def fallback_form_response_search(job: Job, job_embedding: List[float], form_responses) -> List[Dict]:
+    """
+    Fallback form response matching using direct embedding comparison
+    """
+    matches = []
+    
+    for response in form_responses:
+        try:
+            # Simple response text
+            response_text = f"{response.name} {response.response_data.get('Years of Experience', '')} {response.response_data.get('Cover Letter', '')[:200]}"
+            
+            if not response_text.strip():
+                continue
+                
+            response_embedding = get_text_embedding(response_text)
+            similarity_score = calculate_similarity(job_embedding, response_embedding)
+            
+            if similarity_score > 0.4:
+                matches.append({
+                    'candidate_id': response.id,
+                    'candidate_type': 'form_response',
+                    'similarity_score': similarity_score,
+                    'candidate_data': {
+                        'name': response.name,
+                        'email': response.email,
+                        'resume_url': response.resume_url,
+                        'response_data': response.response_data,
+                    }
+                })
+        except Exception as e:
+            logger.error(f"Error in fallback search for form response {response.id}: {str(e)}")
+            
+    return matches
 
 
 def calculate_similarity(embedding1: List[float], embedding2: List[float]) -> float:
     """
     Calculate cosine similarity between two embeddings
-    TODO: Replace with actual similarity calculation
     """
-    # Mock similarity calculation - replace with real cosine similarity
-    import random
-    return random.uniform(0.3, 0.9)  # Mock similarity score
+    return cosine_similarity(embedding1, embedding2)
 
 
 def save_matches_to_db(job: Job, matches: List[Dict]) -> None:
