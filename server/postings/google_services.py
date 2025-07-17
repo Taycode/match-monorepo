@@ -26,8 +26,21 @@ def get_google_credentials():
     Get Google API credentials from environment variables or service account file
     """
     try:
-        # Try service account first (recommended for production)
-        if settings.GOOGLE_CREDENTIALS_FILE and os.path.exists(settings.GOOGLE_CREDENTIALS_FILE):
+        # Try service account JSON string first (recommended for deployment)
+        if settings.GOOGLE_CREDS:
+            try:
+                credentials_info = json.loads(settings.GOOGLE_CREDS)
+                credentials = service_account.Credentials.from_service_account_info(
+                    credentials_info,
+                    scopes=SCOPES
+                )
+                return credentials
+            except json.JSONDecodeError as e:
+                logger.error(f"Invalid JSON in GOOGLE_CREDS: {str(e)}")
+                raise ValueError("GOOGLE_CREDS contains invalid JSON")
+        
+        # Try service account file (recommended for local development)
+        elif settings.GOOGLE_CREDENTIALS_FILE and os.path.exists(settings.GOOGLE_CREDENTIALS_FILE):
             credentials = service_account.Credentials.from_service_account_file(
                 settings.GOOGLE_CREDENTIALS_FILE,
                 scopes=SCOPES
@@ -50,7 +63,7 @@ def get_google_credentials():
             return credentials
         
         else:
-            raise ValueError("Google credentials not configured. Please set GOOGLE_CREDENTIALS_FILE or OAuth2 credentials.")
+            raise ValueError("Google credentials not configured. Please set GOOGLE_CREDS (JSON string), GOOGLE_CREDENTIALS_FILE, or OAuth2 credentials.")
     
     except Exception as e:
         logger.error(f"Error getting Google credentials: {str(e)}")

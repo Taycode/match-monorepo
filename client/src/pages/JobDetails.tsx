@@ -39,16 +39,22 @@ const JobDetails = () => {
   const [loading, setLoading] = useState(true);
   const [syncingResponses, setSyncingResponses] = useState(false);
 
-  // DEBUG: Log to see if component is mounting
-  console.log("JobDetails component mounting, jobId:", jobId);
+  // DEBUG: Log everything to see what's happening
+  console.log("=== JobDetails Debug Info ===");
+  console.log("jobId from useParams:", jobId);
+  console.log("BASE_URL:", BASE_URL);
+  console.log("Current window location:", window.location.href);
+  console.log("Component mounting...");
 
   // Early return for debugging - remove this later
   if (!jobId) {
+    console.log("ERROR: No jobId found in URL params");
     return (
       <div className="w-screen min-h-screen bg-[#E2E1EC] flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 text-lg">DEBUG: No jobId found in URL</p>
           <p className="text-gray-600">Current jobId: {String(jobId)}</p>
+          <p className="text-gray-600">Current URL: {window.location.href}</p>
         </div>
       </div>
     );
@@ -64,12 +70,21 @@ const JobDetails = () => {
 
   const fetchJobDetails = async () => {
     try {
-      console.log("Fetching from URL:", `${BASE_URL}/posting/jobs/${jobId}/`);
-      const response = await axios.get(`${BASE_URL}/posting/jobs/${jobId}/`);
-      console.log("Job details response:", response.data);
+      const url = `${BASE_URL}/posting/jobs/${jobId}/`;
+      console.log("=== Fetching Job Details ===");
+      console.log("Full URL:", url);
+      console.log("BASE_URL:", BASE_URL);
+      console.log("jobId:", jobId);
+      
+      const response = await axios.get(url);
+      console.log("SUCCESS: Job details response:", response.data);
       setJob(response.data);
-    } catch (error) {
-      console.error("Error fetching job details:", error);
+    } catch (error: any) {
+      console.error("=== ERROR Fetching Job Details ===");
+      console.error("Full error:", error);
+      console.error("Response status:", error.response?.status);
+      console.error("Response data:", error.response?.data);
+      console.error("URL that failed:", `${BASE_URL}/posting/jobs/${jobId}/`);
       toast.error("Failed to fetch job details");
     }
   };

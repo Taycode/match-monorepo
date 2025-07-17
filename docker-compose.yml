@@ -24,7 +24,10 @@ services:
       - "8000:8000"
     volumes:
       - ./server:/code
-      - /code/.venv  # Exclude virtual environment from volume
+      - /code/.venv  # Anonymous volume - excludes .venv from host mount
+      - /code/__pycache__  # Anonymous volume - excludes Python cache
+    env_file:
+      - ./server/.env
     environment:
       - DEBUG=1
       - DATABASE_URL=postgresql://match:match@db:5432/match
@@ -46,11 +49,11 @@ services:
     build:
       context: ./client
     ports:
-      - "5173:5222"
+      - "5173:5173"
     volumes:
       - ./client:/app
-      - /app/node_modules
-      - /app/dist
+      - /app/node_modules  # Anonymous volume - excludes node_modules from host mount
+      - /app/dist  # Anonymous volume - excludes build artifacts
     environment:
       - NODE_ENV=development
     depends_on:

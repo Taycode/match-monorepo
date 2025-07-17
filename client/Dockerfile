@@ -1,4 +1,4 @@
-# Use an official Node.js runtime as a parent image
+# Development Dockerfile for React/Vite
 FROM node:20-alpine
 
 # Set the working directory
@@ -8,19 +8,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production=false
+RUN npm ci
 
-# Copy source code including .env file
+# Copy source code
 COPY . .
 
-# Build the application (Vite will automatically pick up .env file)
-RUN npm run build
+# Expose port for dev server
+EXPOSE 5173
 
-# Install serve globally
-RUN npm install -g serve
-
-# Expose port
-EXPOSE 5222
-
-# Start the application
-CMD ["serve", "-s", "dist", "-l", "5222"]
+# Start development server with proper host binding
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

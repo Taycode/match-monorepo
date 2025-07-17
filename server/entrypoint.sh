@@ -15,15 +15,15 @@ echo "Database started"
 
 # Apply database migrations
 echo "Applying database migrations..."
-python manage.py migrate --noinput
+poetry run python manage.py migrate --noinput
 
 # Collect static files (for production)
 echo "Collecting static files..."
-python manage.py collectstatic --noinput || true
+poetry run python manage.py collectstatic --noinput || true
 
 # Create superuser if it doesn't exist (optional)
 echo "Creating superuser..."
-python manage.py shell -c "
+poetry run python manage.py shell -c "
 from django.contrib.auth import get_user_model
 User = get_user_model()
 if not User.objects.filter(email='admin@example.com').exists():
@@ -35,5 +35,5 @@ else:
 
 # Start server
 echo "Starting Django server on port $PORT..."
-exec python manage.py runserver 0.0.0.0:$PORT
+exec poetry run python manage.py runserver 0.0.0.0:$PORT
 
