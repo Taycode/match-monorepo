@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:latest
+    image: postgres:16
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -11,40 +11,53 @@ services:
       POSTGRES_PASSWORD: match
     ports:
       - "5433:5432"
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.20
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U match"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   server:
-    build: ./server
-    command: python manage.py runserver 0.0.0.0:7222
+    build: 
+      context: ./server
+    ports:
+      - "8000:8000"
     volumes:
       - ./server:/code
-    ports:
-      - "7222:7222"
+      - /code/.venv  # Anonymous volume - excludes .venv from host mount
+      - /code/__pycache__  # Anonymous volume - excludes Python cache
+    env_file:
+      - ./server/.env
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgresql://match:match@db:5432/match
+      - DJANGO_SETTINGS_MODULE=match.settings
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - TWITTER_API_KEY=${TWITTER_API_KEY:-}
+      - TWITTER_API_KEY_SECRET=${TWITTER_API_KEY_SECRET:-}
+      - TWITTER_ACCESS_TOKEN=${TWITTER_ACCESS_TOKEN:-}
+      - TWITTER_ACCESS_TOKEN_SECRET=${TWITTER_ACCESS_TOKEN_SECRET:-}
+      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN:-}
+      - PINECONE_API_KEY=${PINECONE_API_KEY:-}
+      - CLIENT_APP_URL=http://localhost:5173
+      - ENVIRONMENT=development
     depends_on:
-      - db
-      - elasticsearch
+      db:
+        condition: service_healthy
+
   client:
     build:
       context: ./client
     ports:
-      - '5222:5222'
+      - "5173:5173"
     volumes:
       - ./client:/app
-      - /app/node_modules
+      - /app/node_modules  # Anonymous volume - excludes node_modules from host mount
+      - /app/dist  # Anonymous volume - excludes build artifacts
     environment:
-      - NODE_ENV=production
-    command: serve -s dist -l 5222
+      - NODE_ENV=development
+    depends_on:
+      - server
 
 volumes:
   postgres_data:
-  elasticsearch_data:

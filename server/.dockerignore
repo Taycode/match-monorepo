@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
 
 # Caches and Logs
 .cache
@@ -42,3 +46,27 @@ Thumbs.db
 
 # Setup files
 /setup
+
+# Additional files and directories
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+nosetests.xml
+coverage.xml
+*.cover
+*.sqlite3
+*.db
+
+node_modules
+.env.local
+.env.*.local
+
+dist
+build
+
+.venv
+venv/
+ENV/

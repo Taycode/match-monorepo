@@ -138,3 +138,35 @@ class OpenAPIClient:
         except Exception as e:
             logger.error(f"Error querying OpenAI API: {e}")
             raise ValueError(f"Failed to query OpenAI API: {e}")
+
+    @staticmethod
+    def get_embedding(text: str, model: str = "text-embedding-3-small") -> list:
+        """
+        Get text embedding using OpenAI's embeddings API
+        """
+        client = OpenAPIClient.build_client()
+        
+        try:
+            # Clean and truncate text if needed
+            text = text.strip()
+            if not text:
+                logger.warning("Empty text provided for embedding")
+                return [0.0] * 1536  # Return zero vector for empty text
+            
+            # Truncate text to fit model limits (8192 tokens for text-embedding-3-small)
+            text = OpenAPIClient.truncate_message(text, model="gpt-4o-mini", max_tokens=8000)
+            
+            response = client.embeddings.create(
+                model=model,
+                input=text,
+                encoding_format="float"
+            )
+            
+            embedding = response.data[0].embedding
+            logger.debug(f"Generated embedding of length {len(embedding)} for text: {text[:50]}...")
+            return embedding
+            
+        except Exception as e:
+            logger.error(f"Error getting embedding for text '{text[:50]}...': {str(e)}")
+            # Return zero vector as fallback
+            return [0.0] * 1536

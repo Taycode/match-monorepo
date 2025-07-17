@@ -1,34 +1,40 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-bullseye
+# Development Dockerfile for Django
+FROM python:3.11-slim
 
-# Set the working directory in the container to /code
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV POETRY_VENV_IN_PROJECT=false
+ENV POETRY_NO_INTERACTION=1
+ENV POETRY_CACHE_DIR=/tmp/poetry_cache
+
+# Set work directory
 WORKDIR /code
 
-# Copy the current directory contents into the container at /code
-ADD . /code
-ENV PYTHONUNBUFFERED=1
+# Install system dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+        netcat-traditional \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="/root/.local/bin:$PATH"
+RUN pip install poetry
 
-# Configure Poetry to create a virtual environment inside the container
-RUN poetry config virtualenvs.in-project true
+# Copy Poetry files
+COPY pyproject.toml poetry.lock* ./
 
-# Install dependencies using Poetry
-RUN poetry install --no-interaction --no-ansi --no-root
+# Configure Poetry and install dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry config virtualenvs.in-project false \
+    && poetry install --no-interaction --no-ansi --no-root
 
-# Set the Poetry virtual environment's path
-ENV VENV_PATH="/code/.venv"
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Activate the virtual environment and ensure it's used for the app
-ENV PATH="$VENV_PATH/bin:$PATH"
+# Expose port
+EXPOSE 8000
 
-# Set default port using an environment variable
-ENV PORT=8000
-
-# Expose the port dynamically
-EXPOSE $PORT
-
-# Default entrypoint script to apply migrations and start the server
-ENTRYPOINT ["sh", "-c", "poetry run python manage.py migrate && poetry run python manage.py runserver 0.0.0.0:$PORT"]
+# Use entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]
