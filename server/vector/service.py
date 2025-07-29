@@ -2,6 +2,7 @@ from pinecone import Pinecone, ServerlessSpec
 from django.conf import settings
 import openai
 from openai import OpenAI
+from typing import Optional, List
 
 
 class VectorManager(object):
@@ -14,9 +15,9 @@ class VectorManager(object):
         if not any(index_name in index["name"] for index in indexes) and create_index:
             pc.create_index(index_name, dimension=1536,
                             metric="cosine", spec=ServerlessSpec(
-                    cloud="aws",
-                    region="us-east-1"
-                ))  # Adjust dimension based on your embedding model
+                                cloud="aws",
+                                region="us-east-1"
+                            ))  # Adjust dimension based on your embedding model
         self.index = pc.Index(index_name)
 
     @staticmethod
@@ -30,7 +31,8 @@ class VectorManager(object):
     @staticmethod
     def build_pinecone_client():
         if VectorManager.pinecone_client is None:
-            VectorManager.pinecone_client = Pinecone(api_key=settings.PINECONE_API_KEY)
+            VectorManager.pinecone_client = Pinecone(
+                api_key=settings.PINECONE_API_KEY)
         return VectorManager.pinecone_client
 
     # Function to generate embeddings using OpenAI
@@ -48,7 +50,20 @@ class VectorManager(object):
         self.index.upsert([(unique_id, embedding, metadata)])
 
     # 2. Search for Talents Based on Job Description
-    def search(self, text: str, top_k: int = 10):
-        query_embedding = self.generate_embedding(text)
-        results = self.index.query(vector=query_embedding, top_k=top_k, include_metadata=True)
+    def search(self, text: Optional[str] = None, top_k: int = 10, filter={}, vector: Optional[List] = None):
+        if vector is None and text is None:
+            raise ValueError(
+                "Either 'text' or 'vector' must be provided for search.")
+        if vector is not None and text is not None:
+            raise ValueError(
+                "Only one of 'text' or 'vector' should be provided for search.")
+        if vector is None:
+            # Generate embedding for the text if not provided
+            query_embedding = self.generate_embedding(text)
+        else:
+            query_embedding = vector
+        results = self.index.query(vector=query_embedding,
+                                   top_k=top_k,
+                                   include_metadata=True,
+                                   filter=filter)
         return results

@@ -323,11 +323,11 @@ class SyncFormResponsesView(APIView):
                     }, status=status.HTTP_400_BAD_REQUEST)
 
             # Sync responses from Google Sheets
-            new_responses = 0  # sync_form_responses(job_id)
+            new_responses = sync_form_responses(job_id)
 
             # Re-run matching if new responses were found
             if new_responses > 0:
-                matches = []  # match_candidates_for_job(job_id)
+                matches = match_candidates_for_job(job_id)
 
                 return Response({
                     'job_id': job_id,

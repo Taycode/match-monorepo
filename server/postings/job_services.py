@@ -15,6 +15,8 @@ from postings.google_services import (
     get_form_responses, grant_form_permissions,
     get_sheet_responses
 )
+from uuid import UUID
+from openai_client.schemas.job_schema import JOB_PARSER_SCHEMA
 
 logger = logging.getLogger(__name__)
 
@@ -53,12 +55,84 @@ def cosine_similarity(vector1: List[float], vector2: List[float]) -> float:
     return similarity
 
 
+def get_structured_data_for_job(job_description: str) -> Dict[str, str | int | float | List[str]]:
+    if not job_description.strip():
+        logger.warning(
+            "Empty job description provided for structured data extraction")
+        return {}
+    try:
+        # Use OpenAI to extract structured job data
+        logger.info("Extracting structured job data using OpenAI")
+        response = OpenAPIClient.query_for_json(
+            "You are an expert at structured data extraction. "
+            "You will be given unstructured job description text from a "
+            "job posting and should convert it into the given structure."
+            "Not applicable fields can be set to null."
+            "Ensure the extracted data is relevant to "
+            "or inferred from  the job posting.",
+            job_description,
+            JOB_PARSER_SCHEMA
+        )
+        json_data = json.loads(response)
+        return json_data
+    except Exception as e:
+        logger.error(f"Error extracting structured job data: {e}")
+        return {}
+
+def generate_candidate_embedding_text(candidate: FormResponse | Talent) -> str:
+    """
+    Generate a natural language representation of a candidate's profile for semantic embedding.
+    Includes role, years of experience, skills, and optional cover letter.
+    """
+    if isinstance(candidate, FormResponse):
+        role = candidate.parsed_data.get('Role') or 'an unspecified role'
+        skills = candidate.parsed_data.get('Skills', [])
+        experience = candidate.parsed_data.get('Years of Experience', 'an unknown number of')
+        cover_letter = candidate.response_data.get('Cover Letter', '').strip()
+        activities = candidate.parsed_data.get('Activities', [])
+        education = candidate.parsed_data.get('Education', 'unspecified')
+
+    elif isinstance(candidate, Talent):
+        role = candidate.role or candidate.parsed_role or 'an unspecified role'
+        skills = candidate.skills or []
+        experience = candidate.years_of_experience or 'an unknown number of'
+        cover_letter = ''
+    else:
+        return ""
+
+    skills_text = (
+        f"The candidate is skilled in {', '.join(skills)}." if skills else "The candidate's technical skills are unspecified."
+    )
+
+    summary = (
+        f"This is a candidate applying for {role}. "
+        f"They have {experience} years of experience. "
+        f"{skills_text}"
+    )
+    activities_text = (
+        f"They have participated in activities such as {', '.join(activities)}." if activities else "No specific activities were mentioned."
+    )
+    education_text = (
+        f"Their educational background includes {education}." if education else "Their educational background is unspecified."
+    )
+
+    summary += f" {activities_text} {education_text}"
+
+    if cover_letter:
+        summary += f" Additional information from the candidate: {cover_letter}"
+
+    return summary.strip()
+
+
 def create_job_with_automations(title: str, description: str) -> Tuple[Job, List[Dict]]:
     """
     Main MVP function that creates a job and triggers all automations
     """
     # 1. Create and save job
     job = Job.objects.create(title=title, description=description)
+    # store structured data in job model
+    job.structured_data = get_structured_data_for_job(description)
+    job.save()
 
     try:
         # 2. Create Google Form
@@ -129,7 +203,6 @@ def create_google_form(job: Job) -> Tuple[str, str]:
         return form_id, form_url
 
 
-
 def create_google_sheet(job: Job, form_id: str) -> Tuple[str, str]:
     """
     Create a Google Sheet linked to the form using real Google Sheets API
@@ -164,13 +237,14 @@ def post_job_to_twitter(job: Job, form_url: str) -> str:
             consumer_key=settings.TWITTER_API_KEY,
             consumer_secret=settings.TWITTER_API_KEY_SECRET,
         )
-        
+
         response = client.create_tweet(text=tweet_text)
         twitter_post_id = response.data['id']
-        
-        logger.info(f"Successfully posted job {job.id} to Twitter: {twitter_post_id}")
+
+        logger.info(
+            f"Successfully posted job {job.id} to Twitter: {twitter_post_id}")
         return twitter_post_id
-        
+
     except Exception as e:
         logger.error(f"Error posting job {job.id} to Twitter: {str(e)}")
         return ""
@@ -209,8 +283,8 @@ def match_candidates_for_job(job_id: str) -> List[Dict]:
         logger.info(f"Running candidate matching for job {job.id}")
 
         # 1. Get job embedding
-        job_text = f"{job.title} {job.description}"
-        job_embedding = get_text_embedding(job_text)
+        job_query = job.get_job_query()
+        job_embedding = get_text_embedding(job_query)
 
         # 2. Match against talent pool
         talent_matches = match_talent_pool(job, job_embedding)
@@ -259,13 +333,13 @@ def match_talent_pool(job: Job, job_embedding: List[float]) -> List[Dict]:
         vector_manager = VectorManager('haya-talents', create_index=False)
 
         # Create job text for searching
-        job_text = f"{job.title} {job.description}"
+        job_query = job.get_job_query()
 
         logger.info(
             f"Searching Pinecone for talent matches against job: {job.title}")
 
         # Search Pinecone for similar talent vectors (top 20 candidates)
-        search_results = vector_manager.search(job_text, top_k=20)
+        search_results = vector_manager.search(job_query, top_k=20)
 
         logger.info(
             f"Found {len(search_results.matches)} potential matches from Pinecone")
@@ -387,7 +461,7 @@ def match_form_responses(job: Job, job_embedding: List[float]) -> List[Dict]:
     try:
         # Try to use Pinecone for form responses (create index if needed)
         vector_manager = VectorManager(
-            f'job-{job.id}-responses', create_index=True)
+            f'haya-jobs-candidates', create_index=True)
 
         # First, ensure all form responses are in Pinecone
         for response in form_responses:
@@ -395,8 +469,10 @@ def match_form_responses(job: Job, job_embedding: List[float]) -> List[Dict]:
                 add_form_response_to_pinecone(response, vector_manager)
 
         # Now search Pinecone for matches
-        job_text = f"{job.title} {job.description}"
-        search_results = vector_manager.search(job_text, top_k=20)
+        job_query = job.get_job_query()
+        search_results = vector_manager.search(job_query, top_k=20, filter={
+            'job_id': str(job.id)  # Filter by job ID
+        })
 
         logger.info(
             f"Found {len(search_results.matches)} form response matches from Pinecone")
@@ -464,27 +540,7 @@ def add_form_response_to_pinecone(response: FormResponse, vector_manager: Vector
     """
     try:
         # Create comprehensive response text for embedding
-        response_text_parts = []
-
-        # Add basic info
-        if response.name:
-            response_text_parts.append(f"Applicant: {response.name}")
-
-        # Add years of experience from form
-        years_exp = response.response_data.get('Years of Experience', '')
-        if years_exp:
-            response_text_parts.append(f"Experience: {years_exp}")
-
-        # Add cover letter content (truncated)
-        cover_letter = response.response_data.get('Cover Letter', '')
-        if cover_letter:
-            cover_letter = cover_letter[:500] + \
-                '...' if len(cover_letter) > 500 else cover_letter
-            response_text_parts.append(f"Cover Letter: {cover_letter}")
-
-        # Combine all parts
-        response_text = ' | '.join(response_text_parts)
-
+        response_text = generate_candidate_embedding_text(response)
         if not response_text.strip():
             return ""
 
@@ -603,13 +659,36 @@ def sync_form_responses(job_id: str) -> int:
             ).exists():
 
                 # Create new FormResponse
-                FormResponse.objects.create(
+                form_response = FormResponse.objects.create(
                     job=job,
                     name=response.get('Full Name', ''),
                     email=response.get('Email Address', ''),
                     resume_url=response.get('Resume/CV', ''),
                     response_data=response
                 )
+                # process new form response
+                # parse resume and update parsed_data
+                from common.utils.document_reader import DocumentReader
+                from talents.service import parse_candidate_resume
+                document_reader = DocumentReader()
+                resume_text = document_reader.read_document(
+                    form_response.resume_url)
+                logger.info(
+                    f"Parsing resume for form response {form_response.id}")
+                logger.debug(f"Resume text: {resume_text[:100]}...")
+                if not resume_text:
+                    logger.warning(
+                        f"No text extracted from resume for form response {form_response.id}")
+                    continue
+                parsed_resume_response = parse_candidate_resume(resume_text)
+                form_response.parsed_data = {
+                    'Role': parsed_resume_response.role,
+                    'Skills': parsed_resume_response.skills,
+                    'Years of Experience': parsed_resume_response.years_of_experience,
+                    'Education': parsed_resume_response.education,
+                    'Activities': parsed_resume_response.activities or []
+                }
+                form_response.save()
                 new_responses += 1
 
         logger.info(f"Synced {new_responses} new responses for job {job.id}")

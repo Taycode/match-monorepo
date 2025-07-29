@@ -138,7 +138,7 @@ class MatchSerializer(serializers.ModelSerializer):
             try:
                 form_response = FormResponse.objects.get(id=obj.candidate_id)
                 # Extract skills from response_data if available
-                return form_response.response_data.get('skills', [])
+                return form_response.parsed_data.get('Skills', [])
             except FormResponse.DoesNotExist:
                 return None
         return None

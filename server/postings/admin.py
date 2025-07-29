@@ -15,7 +15,7 @@ class JobAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Job Details', {
-            'fields': ('title', 'description')
+            'fields': ('title', 'description', 'structured_data')
         }),
         ('Automation Links', {
             'fields': ('google_form_id', 'google_form_url', 'google_sheet_id', 'google_sheet_url', 'twitter_post_id')
