@@ -15,6 +15,12 @@ JOB_PARSER_SCHEMA = {
                     "type": "string",
                     "description": "The job role extracted from the job. "
                 },
+                "specialization": {
+                    "type": "string",
+                    "description": "The specialization of the job, such as"
+                    "'backend', 'frontend', 'fullstack', 'mobile', 'web', 'api', 'database',"
+                    "'distributed system', 'microservices', 'cloud', 'infrastructure'"
+                },
                 "role_level": {
                     "type": "string",
                     "description": "The level of the job role, such as 'junior', 'mid', or 'senior'.",
@@ -65,7 +71,7 @@ JOB_PARSER_SCHEMA = {
                     ]
                 },
             },
-            "required": ["title", "role",  "role_level",
+            "required": ["title", "role", "specialization", "role_level",
                          "skills", "technologies", "years_of_experience",
                          "education", "location", "responsibilities_summary"],
             "additionalProperties": False

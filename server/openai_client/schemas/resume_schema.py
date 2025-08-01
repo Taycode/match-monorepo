@@ -11,6 +11,12 @@ RESUME_PARSER_SCHEMA = {
                     "type": "string",
                     "description": "The job role extracted from the resume."
                 },
+                "specialization": {
+                    "type": "string",
+                    "description": "The specialization of the resume, such as"
+                    "'backend', 'frontend', 'fullstack', 'mobile', 'web', 'api', 'database',"
+                    "'distributed system', 'microservices', 'cloud', 'infrastructure'"
+                },
                 "skills": {
                     "type": "array",
                     "items": {
@@ -35,7 +41,7 @@ RESUME_PARSER_SCHEMA = {
                     "description": "A list of responsibilities or activities done in previous work experience."
                 }
             },
-            "required": ["role", "skills", "years_of_experience", "activities", "education"],
+            "required": ["role", "specialization", "skills", "years_of_experience", "activities", "education"],
             "additionalProperties": False}
     }
 }

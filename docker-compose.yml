@@ -31,6 +31,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
   client:
     build:
@@ -45,6 +47,14 @@ services:
       - NODE_ENV=development
     depends_on:
       - server
+  
+  redis:
+    image: redis:8.0.3
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
 volumes:
   postgres_data:
+  redis_data:

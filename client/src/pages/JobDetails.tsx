@@ -178,12 +178,36 @@ const JobDetails = () => {
 
       <div className="max-w-6xl mx-auto pt-20">
         <div className="bg-white shadow-xl rounded-2xl p-8 mx-4">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          {/* Header with Back Arrow */}
+          <div className="flex items-center gap-4 mb-6">
+            <Link
+              to="/jobs"
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors group"
+              title="Back to Jobs"
+            >
+              <svg
+                className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </Link>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-800">
                 {job.title}
               </h1>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-start mb-8">
+            <div>
               <p className="text-gray-600">
                 Created: {formatDate(job.created_at)}
               </p>
@@ -191,18 +215,12 @@ const JobDetails = () => {
                 Updated: {formatDate(job.updated_at)}
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-y-3 gap-l-3">
               <Link
                 to={`/jobs/${jobId}/matches`}
                 className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
               >
                 View Matches ({stats.total_matches})
-              </Link>
-              <Link
-                to="/jobs"
-                className="bg-gray-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-700 transition-colors"
-              >
-                Back to Jobs
               </Link>
             </div>
           </div>

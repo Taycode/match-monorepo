@@ -7,7 +7,7 @@ from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from django.db import models
 
 from .models import Posting, Job, Match
-from .pagination import PostingCursorPagination
+from .pagination import PostingCursorPagination, StandardResultsSetPagination
 from .serializers import (
     PostingSerializer, InitiatePostingSerializer,
     JobSerializer, CreateJobSerializer, MatchSerializer
@@ -117,6 +117,7 @@ class ListJobsView(generics.ListAPIView):
     """
     queryset = Job.objects.all()
     serializer_class = JobSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         queryset = Job.objects.all()

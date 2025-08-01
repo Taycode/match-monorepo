@@ -49,6 +49,9 @@ class VectorManager(object):
         embedding = self.generate_embedding(text)
         self.index.upsert([(unique_id, embedding, metadata)])
 
+    def clear_index(self):
+        self.index.delete(delete_all=True)
+
     # 2. Search for Talents Based on Job Description
     def search(self, text: Optional[str] = None, top_k: int = 10, filter={}, vector: Optional[List] = None):
         if vector is None and text is None:

@@ -1,5 +1,4 @@
 import json
-
 from common.utils.document_reader import DocumentReader
 from openai_client.client import OpenAPIClient
 from talents.dataclass import ParsedResumeResponse
@@ -7,52 +6,6 @@ from openai_client.schemas.resume_schema import RESUME_PARSER_SCHEMA
 from talents.models import Talent
 from vector.service import VectorManager
 from dataclasses import asdict
-
-# class TalentService:
-#     @staticmethod
-#     def build_completion_message(query: str):
-#         return f"""
-#         I want you to return a json (only json) in this format.
-#         {{
-#         "role": "",
-#         "skills": [],
-#         "years_of_experience": {{ "gte": "", "lte": "" }},
-#         }}
-#
-#         using this query
-#
-#         {query}
-#         """
-#
-#     @staticmethod
-#     def process_keyword(query: str) -> ParsedResponse:
-#         message = TalentService.build_completion_message(query)
-#         response = OpenAPIClient.query_for_json(
-#             "You are a helpful assistant that can access external functions. You only "
-#             "answer in JSON as you are part of an existing strict code base. Not "
-#             "applicable fields can be set to null.",
-#             message
-#         )
-#         try:
-#             filter_data = json.loads(response.content)
-#             role = filter_data.get('role')
-#             skills = filter_data.get('skills', [])
-#             years_of_experience = filter_data.get('years_of_experience')
-#             # remove empty fields
-#             years_of_experience = {
-#                 key: value
-#                 for key, value in years_of_experience.items()
-#                 if value
-#             }
-#         except Exception as e:
-#             raise e
-#         return ParsedResponse(
-#             role=role,
-#             skills=skills,
-#             years_of_experience=years_of_experience
-#         )
-#
-
 
 def build_talent_skill_fetcher_query(resume_text: str) -> str:
     return f"""
@@ -92,12 +45,14 @@ def parse_candidate_resume(resume_text: str):
         json_data = json.loads(response)
         print(f"Parsed resume data: {json_data}")
         role = json_data.get('role')
+        specialization = json_data.get('specialization', None)
         skills = json_data.get('skills', [])
         years_of_experience = json_data.get('years_of_experience')
         activities = json_data.get('activities', [])
         education = json_data.get('education', None)
         return ParsedResumeResponse(
             role=role,
+            specialization=specialization,
             skills=skills,
             years_of_experience=years_of_experience,
             activities=activities,
@@ -107,6 +62,7 @@ def parse_candidate_resume(resume_text: str):
         print(f"Error parsing candidate resume: {e}")
         return ParsedResumeResponse(
             role=None,
+            specialization=None,
             skills=[],
             years_of_experience=0,
             activities=[],

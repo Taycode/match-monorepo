@@ -27,7 +27,7 @@ class Job(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     # Store structured data from job description
-    structured_data = models.JSONField(default=dict)
+    structured_data = models.JSONField(default=dict, blank=True, null=True)
 
     # Google integrations
     google_form_id = models.CharField(max_length=255, blank=True, null=True)
@@ -103,9 +103,9 @@ class FormResponse(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField()
     resume_url = models.URLField(blank=True, null=True)
-    response_data = models.JSONField(default=dict)  # Store all form data
+    response_data = models.JSONField(default=dict, blank=True, null=True)  # Store all form data
     # Store parsed data for easier access
-    parsed_data = models.JSONField(default=dict)
+    parsed_data = models.JSONField(default=dict, blank=True, null=True)
     vector_id = models.CharField(
         max_length=255, blank=True, null=True)  # Pinecone vector ID
     created_at = models.DateTimeField(auto_now_add=True)

@@ -137,7 +137,7 @@ class OpenAPIClient:
             raise ValueError(f"Failed to query OpenAI API: {e}")
 
     @staticmethod
-    def get_embedding(text: str, model: str = "text-embedding-3-small") -> list:
+    def get_embedding(text: str, model: str = "text-embedding-ada-002") -> list:
         """
         Get text embedding using OpenAI's embeddings API
         """
