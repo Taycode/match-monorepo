@@ -13,7 +13,7 @@ JOB_PARSER_SCHEMA = {
                 },
                 "role": {
                     "type": "string",
-                    "description": "The job role extracted from the job. "
+                    "description": "The job role extracted from the job description and title. "
                 },
                 "specialization": {
                     "type": "string",

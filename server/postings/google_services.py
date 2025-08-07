@@ -146,18 +146,6 @@ def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
                 }
             },
             {
-                "title": "Cover Letter",
-                "description": "Please write a brief cover letter explaining why you're interested in this position",
-                "questionItem": {
-                    "question": {
-                        "required": False,
-                        "textQuestion": {
-                            "paragraph": True
-                        }
-                    }
-                }
-            },
-            {
                 "title": "Years of Experience",
                 "description": "How many years of relevant experience do you have?",
                 "questionItem": {

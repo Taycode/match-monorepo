@@ -57,7 +57,7 @@ def cosine_similarity(vector1: List[float], vector2: List[float]) -> float:
     return similarity
 
 
-def get_structured_data_for_job(job_description: str) -> Dict[str, str | int | float | List[str]]:
+def get_structured_data_for_job(job_title: str, job_description: str) -> Dict[str, str | int | float | List[str]]:
     if not job_description.strip():
         logger.warning(
             "Empty job description provided for structured data extraction")
@@ -67,12 +67,14 @@ def get_structured_data_for_job(job_description: str) -> Dict[str, str | int | f
         logger.info("Extracting structured job data using OpenAI")
         response = OpenAPIClient.query_for_json(
             "You are an expert at structured data extraction. "
-            "You will be given unstructured job description text from a "
+            "You will be given unstructured job title and description text from a "
             "job posting and should convert it into the given structure."
             "Not applicable fields can be set to null."
+            "Ensure the role field is a specific job title or " \
+            "role the job is targeting? Return a list of likely role names"
             "Ensure the extracted data is relevant to "
             "or inferred from  the job posting.",
-            job_description,
+            f"{job_title}\n{job_description}",
             JOB_PARSER_SCHEMA
         )
         json_data = json.loads(response)
@@ -85,14 +87,13 @@ def get_structured_data_for_job(job_description: str) -> Dict[str, str | int | f
 def generate_candidate_embedding_text(candidate: FormResponse | Talent) -> str:
     """
     Generate a natural language representation of a candidate's profile for semantic embedding.
-    Includes role, years of experience, skills, and optional cover letter.
+    Includes role, years of experience, skills.
     """
     if isinstance(candidate, FormResponse):
         role = candidate.parsed_data.get('Role') or 'an unspecified role'
         skills = candidate.parsed_data.get('Skills', [])
         experience = candidate.parsed_data.get(
             'Years of Experience', 'an unknown number of')
-        cover_letter = candidate.response_data.get('Cover Letter', '').strip()
         activities = candidate.parsed_data.get('Activities', [])
         education = candidate.parsed_data.get('Education', 'unspecified')
 
@@ -100,7 +101,6 @@ def generate_candidate_embedding_text(candidate: FormResponse | Talent) -> str:
         role = candidate.role or candidate.parsed_role or 'an unspecified role'
         skills = candidate.skills or []
         experience = candidate.years_of_experience or 'an unknown number of'
-        cover_letter = ''
     else:
         return ""
 
@@ -122,9 +122,6 @@ def generate_candidate_embedding_text(candidate: FormResponse | Talent) -> str:
 
     summary += f" {activities_text} {education_text}"
 
-    if cover_letter:
-        summary += f" Additional information from the candidate: {cover_letter}"
-
     return summary.strip()
 
 
@@ -135,7 +132,7 @@ def create_job_with_automations(title: str, description: str) -> Tuple[Job, List
     # 1. Create and save job
     job = Job.objects.create(title=title, description=description)
     # store structured data in job model
-    job.structured_data = get_structured_data_for_job(description)
+    job.structured_data = get_structured_data_for_job(title, description)
     job.save()
 
     try:
@@ -537,7 +534,6 @@ def match_form_responses(job: Job, job_embedding: List[float]) -> List[Dict]:
                         'resume_url': response.resume_url,
                         'phone': response.response_data.get('Phone Number', ''),
                         'years_of_experience': response.response_data.get('Years of Experience', ''),
-                        'cover_letter': response.response_data.get('Cover Letter', ''),
                         'response_data': response.response_data,
                         'pinecone_metadata': metadata
                     }
@@ -607,7 +603,7 @@ def build_pinecone_form_response_filter(job: Job) -> Dict[str, Any]:
         # Get compatible roles for basic Pinecone filtering
         compatible_roles = get_compatible_roles_for_form_responses(
             job_role, job_role_level)
-        if compatible_roles:
+        if compatible_roles and len(compatible_roles) > 3:
             pinecone_filter['role'] = {'$in': compatible_roles}
 
     # job_specialization = job_structured_data.get('specialization', '').lower().strip()
@@ -692,12 +688,7 @@ def get_compatible_roles_for_form_responses(job_role: str, job_role_level: str =
         base_role = job_role_lower.replace('senior', '').replace(
             'junior', '').replace('lead', '').strip()
         compatible_roles = [
-            base_role,
-            f"{base_role} developer",
-            f"{base_role} engineer",
-            f"software {base_role}",
-            "software engineer",
-            "software developer"
+            base_role
         ]
 
     # Add role level variations if specified
@@ -752,7 +743,6 @@ def fallback_form_response_search(job: Job, job_embedding: List[float], form_res
                         'resume_url': response.resume_url,
                         'phone': response.response_data.get('Phone Number', ''),
                         'years_of_experience': response.response_data.get('Years of Experience', ''),
-                        'cover_letter': response.response_data.get('Cover Letter', ''),
                         'response_data': response.response_data,
                     }
                 })

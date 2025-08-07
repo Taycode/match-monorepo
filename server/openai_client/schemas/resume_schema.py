@@ -9,7 +9,7 @@ RESUME_PARSER_SCHEMA = {
             "properties": {
                 "role": {
                     "type": "string",
-                    "description": "The job role extracted from the resume."
+                    "description": "The job role extracted from the resume.e.g Backend Developer, Frontend Developer, Fullstack Developer, etc."
                 },
                 "specialization": {
                     "type": "string",
