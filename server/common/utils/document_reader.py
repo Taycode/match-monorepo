@@ -11,6 +11,11 @@ class DocumentReader:
         Fetch the document from the given URL.
         """
         try:
+            # Handle Google Drive URLs
+            if "drive.google.com" in url:
+                file_id = url.split("/d/")[1].split("/")[0]
+                url = f"https://drive.google.com/uc?export=download&id={file_id}"
+            
             response = requests.get(url)
             response.raise_for_status()  # Raise an HTTPError for bad responses
             return response.content, response.headers.get('Content-Type', '')
@@ -52,12 +57,20 @@ class DocumentReader:
         try:
             file_content, content_type = self.fetch_document(url)
             file_stream = BytesIO(file_content)
-
+            print(f"Reading document from {url} with content type {content_type}")
+            print(f"File content: {file_content[:100]}...")  # Print first 100 bytes for debugging
             if 'application/pdf' in content_type or url.endswith('.pdf'):
                 return self.read_pdf(file_stream)
             elif 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' in content_type or url.endswith('.docx'):
                 return self.read_docx(file_stream)
+            elif 'application/octet-stream' in content_type:
+                # try the two read methods
+                try:
+                    return self.read_pdf(file_stream)
+                except ValueError:
+                    return self.read_docx(file_stream)
             else:
                 raise ValueError("Unsupported document type. Only PDF and DOCX are supported.")
         except Exception as e:
-            return f"An error occurred: {e}"
+            print(f"Error reading document: {e}")
+            return None

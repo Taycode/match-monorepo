@@ -7,7 +7,7 @@ from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from django.db import models
 
 from .models import Posting, Job, Match
-from .pagination import PostingCursorPagination
+from .pagination import PostingCursorPagination, StandardResultsSetPagination
 from .serializers import (
     PostingSerializer, InitiatePostingSerializer,
     JobSerializer, CreateJobSerializer, MatchSerializer
@@ -36,7 +36,8 @@ class CreatePostingView(generics.CreateAPIView):
             raise e from e
         except Exception:
             # Log any unexpected error and return a generic 500
-            logger.exception("Error creating Posting or posting tweet on Twitter")
+            logger.exception(
+                "Error creating Posting or posting tweet on Twitter")
             return Response({'message': 'An error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def perform_create(self, serializer):
@@ -81,16 +82,17 @@ class CreateJobView(APIView):
     """
     Create a new job posting with all automations
     """
+
     def post(self, request):
         serializer = CreateJobSerializer(data=request.data)
         if serializer.is_valid():
             try:
                 title = serializer.validated_data['title']
                 description = serializer.validated_data['description']
-                
+
                 # Create job with all automations
                 job, matches = create_job_with_automations(title, description)
-                
+
                 # Return job details with matches
                 job_serializer = JobSerializer(job)
                 return Response({
@@ -98,14 +100,14 @@ class CreateJobView(APIView):
                     'matches_count': len(matches),
                     'message': 'Job created successfully with all automations'
                 }, status=status.HTTP_201_CREATED)
-                
+
             except Exception as e:
                 logger.error(f"Error creating job: {str(e)}")
                 return Response({
                     'error': 'Failed to create job with automations',
                     'details': str(e)
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -115,7 +117,8 @@ class ListJobsView(generics.ListAPIView):
     """
     queryset = Job.objects.all()
     serializer_class = JobSerializer
-    
+    pagination_class = StandardResultsSetPagination
+
     def get_queryset(self):
         queryset = Job.objects.all()
         # Add search functionality
@@ -138,23 +141,24 @@ class JobMatchesView(generics.ListAPIView):
     Get all matches for a specific job
     """
     serializer_class = MatchSerializer
-    
+
     def get_queryset(self):
         job_id = self.kwargs['job_id']
         return Match.objects.filter(job_id=job_id)
-    
+
     def get(self, request, job_id):
         try:
             job = Job.objects.get(id=job_id)
-            matches = Match.objects.filter(job=job).order_by('-similarity_score')
-            
+            matches = Match.objects.filter(
+                job=job).order_by('-similarity_score')
+
             # Separate matches by type
             talent_matches = matches.filter(candidate_type='talent')
             form_matches = matches.filter(candidate_type='form_response')
-            
+
             talent_serializer = MatchSerializer(talent_matches, many=True)
             form_serializer = MatchSerializer(form_matches, many=True)
-            
+
             return Response({
                 'job_id': job_id,
                 'job_title': job.title,
@@ -168,7 +172,7 @@ class JobMatchesView(generics.ListAPIView):
                     'candidates': form_serializer.data
                 }
             })
-            
+
         except Job.DoesNotExist:
             return Response({
                 'error': 'Job not found'
@@ -184,11 +188,13 @@ class ShortlistCandidateView(APIView):
     """
     Shortlist or un-shortlist a candidate
     """
+
     def post(self, request, match_id):
         try:
             match = Match.objects.get(id=match_id)
-            action = request.data.get('action', 'shortlist')  # 'shortlist' or 'remove'
-            
+            # 'shortlist' or 'remove'
+            action = request.data.get('action', 'shortlist')
+
             if action == 'shortlist':
                 match.is_shortlisted = True
                 message = 'Candidate shortlisted successfully'
@@ -199,21 +205,22 @@ class ShortlistCandidateView(APIView):
                 return Response({
                     'error': 'Invalid action. Use "shortlist" or "remove"'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             match.save()
-            
+
             serializer = MatchSerializer(match)
             return Response({
                 'match': serializer.data,
                 'message': message
             })
-            
+
         except Match.DoesNotExist:
             return Response({
                 'error': 'Match not found'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error updating shortlist for match {match_id}: {str(e)}")
+            logger.error(
+                f"Error updating shortlist for match {match_id}: {str(e)}")
             return Response({
                 'error': 'Failed to update shortlist'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -223,28 +230,30 @@ class RefreshMatchesView(APIView):
     """
     Re-run matching algorithm for a job
     """
+
     def post(self, request, job_id):
         try:
             job = Job.objects.get(id=job_id)
-            
+
             # Clear existing matches
             Match.objects.filter(job=job).delete()
-            
+
             # Run matching again
             matches = match_candidates_for_job(job_id)
-            
+
             return Response({
                 'job_id': job_id,
                 'matches_found': len(matches),
                 'message': 'Matches refreshed successfully'
             })
-            
+
         except Job.DoesNotExist:
             return Response({
                 'error': 'Job not found'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error refreshing matches for job {job_id}: {str(e)}")
+            logger.error(
+                f"Error refreshing matches for job {job_id}: {str(e)}")
             return Response({
                 'error': 'Failed to refresh matches'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -254,11 +263,12 @@ class JobStatsView(APIView):
     """
     Get statistics for a job
     """
+
     def get(self, request, job_id):
         try:
             job = Job.objects.get(id=job_id)
             matches = Match.objects.filter(job=job)
-            
+
             stats = {
                 'job_title': job.title,
                 'created_at': job.created_at,
@@ -273,9 +283,9 @@ class JobStatsView(APIView):
                     avg_score=models.Avg('similarity_score')
                 )['avg_score'] or 0
             }
-            
+
             return Response(stats)
-            
+
         except Job.DoesNotExist:
             return Response({
                 'error': 'Job not found'
@@ -291,22 +301,35 @@ class SyncFormResponsesView(APIView):
     """
     Sync form responses from Google Sheets for a specific job
     """
+
     def post(self, request, job_id):
         try:
             job = Job.objects.get(id=job_id)
-            
+            from .google_services import get_a_google_form
+
             if not job.google_sheet_id:
-                return Response({
-                    'error': 'Job has no Google Sheet configured'
-                }, status=status.HTTP_400_BAD_REQUEST)
-            
+
+                form = get_a_google_form(job.google_form_id)
+
+                linked_sheet_id = form.get('linkedSheetId') if form else None
+                if linked_sheet_id:
+                    job.google_sheet_id = form.get('linkedSheetId')
+                    job.google_sheet_url = f"https://docs.google.com/spreadsheets/d/{linked_sheet_id}"
+                    job.save()
+                else:
+                    logger.error(
+                        f"Job {job_id} has no Google Sheet configured")
+                    return Response({
+                        'error': 'Job has no Google Sheet configured'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
             # Sync responses from Google Sheets
             new_responses = sync_form_responses(job_id)
-            
+
             # Re-run matching if new responses were found
             if new_responses > 0:
                 matches = match_candidates_for_job(job_id)
-                
+
                 return Response({
                     'job_id': job_id,
                     'new_responses': new_responses,
@@ -319,13 +342,14 @@ class SyncFormResponsesView(APIView):
                     'new_responses': 0,
                     'message': 'No new responses found'
                 })
-                
+
         except Job.DoesNotExist:
             return Response({
                 'error': 'Job not found'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"Error syncing form responses for job {job_id}: {str(e)}")
+            logger.error(
+                f"Error syncing form responses for job {job_id}: {str(e)}")
             return Response({
                 'error': 'Failed to sync form responses',
                 'details': str(e)

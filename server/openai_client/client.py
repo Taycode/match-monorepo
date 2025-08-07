@@ -63,7 +63,8 @@ class OpenAPIClient:
         # Estimate and truncate if necessary
         token_count = OpenAPIClient.estimate_tokens(messages)
         if token_count > max_input_tokens:
-            logger.warning(f"Input token count ({token_count}) exceeds limit ({max_input_tokens}). Truncating messages.")
+            logger.warning(
+                f"Input token count ({token_count}) exceeds limit ({max_input_tokens}). Truncating messages.")
             user_message["content"] = OpenAPIClient.truncate_message(
                 user_message["content"], max_tokens=max_input_tokens // 2
             )
@@ -76,26 +77,21 @@ class OpenAPIClient:
             response = client.chat.completions.create(
                 model='gpt-4o-mini',
                 temperature=0.1,
-                response_format={
-                    "type": "json_object",
-                },
                 messages=messages,
-                tools=schema,
-                tool_choice="auto",
+                response_format=schema,
                 max_tokens=max_response_tokens,
                 n=1,
                 stop=None
             )
             # Access response attributes directly
             choice = response.choices[0]
-            message_content = choice.message
-            tool_calls = message_content.tool_calls
-
-            # Validate and extract tool call arguments
-            if tool_calls and hasattr(tool_calls[0], "function"):
-                return tool_calls[0].function.arguments
-            else:
-                raise ValueError("Unexpected response structure from OpenAI API.")
+            message = choice.message
+            return message.content
+            # # Validate and extract tool call arguments
+            # if tool_calls and hasattr(tool_calls[0], "function"):
+            #     return tool_calls[0].function.arguments
+            # else:
+            #     raise ValueError("Unexpected response structure from OpenAI API.")
         except Exception as e:
             logger.error(f"Error querying OpenAI API: {e}")
             raise ValueError(f"Failed to query OpenAI API: {e}")
@@ -118,7 +114,8 @@ class OpenAPIClient:
         # Estimate and truncate if necessary
         token_count = OpenAPIClient.estimate_tokens(messages)
         if token_count > max_input_tokens:
-            logger.warning(f"Input token count ({token_count}) exceeds limit ({max_input_tokens}). Truncating messages.")
+            logger.warning(
+                f"Input token count ({token_count}) exceeds limit ({max_input_tokens}). Truncating messages.")
             user_message["content"] = OpenAPIClient.truncate_message(
                 user_message["content"], max_tokens=max_input_tokens // 2
             )
@@ -140,33 +137,36 @@ class OpenAPIClient:
             raise ValueError(f"Failed to query OpenAI API: {e}")
 
     @staticmethod
-    def get_embedding(text: str, model: str = "text-embedding-3-small") -> list:
+    def get_embedding(text: str, model: str = "text-embedding-ada-002") -> list:
         """
         Get text embedding using OpenAI's embeddings API
         """
         client = OpenAPIClient.build_client()
-        
+
         try:
             # Clean and truncate text if needed
             text = text.strip()
             if not text:
                 logger.warning("Empty text provided for embedding")
                 return [0.0] * 1536  # Return zero vector for empty text
-            
+
             # Truncate text to fit model limits (8192 tokens for text-embedding-3-small)
-            text = OpenAPIClient.truncate_message(text, model="gpt-4o-mini", max_tokens=8000)
-            
+            text = OpenAPIClient.truncate_message(
+                text, model="gpt-4o-mini", max_tokens=8000)
+
             response = client.embeddings.create(
                 model=model,
                 input=text,
                 encoding_format="float"
             )
-            
+
             embedding = response.data[0].embedding
-            logger.debug(f"Generated embedding of length {len(embedding)} for text: {text[:50]}...")
+            logger.debug(
+                f"Generated embedding of length {len(embedding)} for text: {text[:50]}...")
             return embedding
-            
+
         except Exception as e:
-            logger.error(f"Error getting embedding for text '{text[:50]}...': {str(e)}")
+            logger.error(
+                f"Error getting embedding for text '{text[:50]}...': {str(e)}")
             # Return zero vector as fallback
             return [0.0] * 1536

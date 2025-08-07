@@ -9,6 +9,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def get_google_credentials():
             except json.JSONDecodeError as e:
                 logger.error(f"Invalid JSON in GOOGLE_CREDS: {str(e)}")
                 raise ValueError("GOOGLE_CREDS contains invalid JSON")
-        
+
         # Try service account file (recommended for local development)
         elif settings.GOOGLE_CREDENTIALS_FILE and os.path.exists(settings.GOOGLE_CREDENTIALS_FILE):
             credentials = service_account.Credentials.from_service_account_file(
@@ -46,7 +47,7 @@ def get_google_credentials():
                 scopes=SCOPES
             )
             return credentials
-        
+
         # Fallback to OAuth2 credentials
         elif settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET and settings.GOOGLE_REFRESH_TOKEN:
             credentials = Credentials(
@@ -57,14 +58,15 @@ def get_google_credentials():
                 client_secret=settings.GOOGLE_CLIENT_SECRET,
                 scopes=SCOPES
             )
-            
+
             # Refresh the token
             credentials.refresh(Request())
             return credentials
-        
+
         else:
-            raise ValueError("Google credentials not configured. Please set GOOGLE_CREDS (JSON string), GOOGLE_CREDENTIALS_FILE, or OAuth2 credentials.")
-    
+            raise ValueError(
+                "Google credentials not configured. Please set GOOGLE_CREDS (JSON string), GOOGLE_CREDENTIALS_FILE, or OAuth2 credentials.")
+
     except Exception as e:
         logger.error(f"Error getting Google credentials: {str(e)}")
         raise
@@ -73,32 +75,31 @@ def get_google_credentials():
 def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
     """
     Create a Google Form for job applications
-    
+
     Returns:
         Tuple of (form_id, form_url)
     """
     try:
         credentials = get_google_credentials()
         service = build('forms', 'v1', credentials=credentials)
-        
+
         # Create the form
         form_body = {
             "info": {
                 "title": f"Application for {job_title}",
-                "description": f"Please fill out this form to apply for the position: {job_title}\n\n{job_description[:200]}..."
+                "documentTitle": f"Application Form - {job_title} {datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}",
             }
         }
-        
+
         # Create form
         form = service.forms().create(body=form_body).execute()
         form_id = form['formId']
-        
+
         # Add questions to the form
         questions = [
             {
                 "title": "Full Name",
                 "description": "Please enter your full name",
-                "required": True,
                 "questionItem": {
                     "question": {
                         "required": True,
@@ -111,7 +112,6 @@ def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
             {
                 "title": "Email Address",
                 "description": "Please enter your email address",
-                "required": True,
                 "questionItem": {
                     "question": {
                         "required": True,
@@ -124,7 +124,6 @@ def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
             {
                 "title": "Phone Number",
                 "description": "Please enter your phone number",
-                "required": False,
                 "questionItem": {
                     "question": {
                         "required": False,
@@ -137,7 +136,6 @@ def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
             {
                 "title": "Resume/CV",
                 "description": "Please provide a link to your resume/CV (Google Drive, Dropbox, etc.)",
-                "required": True,
                 "questionItem": {
                     "question": {
                         "required": True,
@@ -148,22 +146,8 @@ def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
                 }
             },
             {
-                "title": "Cover Letter",
-                "description": "Please write a brief cover letter explaining why you're interested in this position",
-                "required": False,
-                "questionItem": {
-                    "question": {
-                        "required": False,
-                        "textQuestion": {
-                            "paragraph": True
-                        }
-                    }
-                }
-            },
-            {
                 "title": "Years of Experience",
                 "description": "How many years of relevant experience do you have?",
-                "required": True,
                 "questionItem": {
                     "question": {
                         "required": True,
@@ -181,9 +165,17 @@ def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
                 }
             }
         ]
-        
+
         # Add questions to form
-        requests = []
+        requests = [
+            {"updateFormInfo": {
+                "info": {
+                    "description": f"Please fill out this form to apply for the position: "
+                    f"{job_title}\n\n{job_description}..."
+                },
+                "updateMask": "description"
+            }}
+        ]
         for i, question in enumerate(questions):
             requests.append({
                 "createItem": {
@@ -193,19 +185,19 @@ def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
                     }
                 }
             })
-        
+
         # Batch update to add all questions
         service.forms().batchUpdate(
             formId=form_id,
             body={"requests": requests}
         ).execute()
-        
+
         # Get the form URL
         form_url = f"https://docs.google.com/forms/d/{form_id}/viewform"
-        
+
         logger.info(f"Successfully created Google Form: {form_id}")
         return form_id, form_url
-        
+
     except HttpError as error:
         logger.error(f"Google Forms API error: {error}")
         raise Exception(f"Failed to create Google Form: {error}")
@@ -217,7 +209,7 @@ def create_google_form(job_title: str, job_description: str) -> Tuple[str, str]:
 def create_google_sheet(job_title: str, form_id: str) -> Tuple[str, str]:
     """
     Create a Google Sheet to collect form responses
-    
+
     Returns:
         Tuple of (sheet_id, sheet_url)
     """
@@ -225,7 +217,7 @@ def create_google_sheet(job_title: str, form_id: str) -> Tuple[str, str]:
         credentials = get_google_credentials()
         sheets_service = build('sheets', 'v4', credentials=credentials)
         forms_service = build('forms', 'v1', credentials=credentials)
-        
+
         # Create the spreadsheet
         spreadsheet_body = {
             'properties': {
@@ -237,14 +229,15 @@ def create_google_sheet(job_title: str, form_id: str) -> Tuple[str, str]:
                 }
             }]
         }
-        
+
         spreadsheet = sheets_service.spreadsheets().create(
             body=spreadsheet_body
         ).execute()
-        
-        sheet_id = spreadsheet['spreadsheetId']
-        sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
-        
+
+        spreadsheet_id = spreadsheet['spreadsheetId']
+        sheet_id = spreadsheet['sheets'][0]['properties']['sheetId']
+        sheet_url = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}"
+
         # Set up headers for the responses
         headers = [
             'Timestamp',
@@ -255,26 +248,26 @@ def create_google_sheet(job_title: str, form_id: str) -> Tuple[str, str]:
             'Cover Letter',
             'Years of Experience'
         ]
-        
+
         # Add headers to the sheet
         values = [headers]
         body = {
             'values': values
         }
-        
+
         sheets_service.spreadsheets().values().update(
-            spreadsheetId=sheet_id,
+            spreadsheetId=spreadsheet_id,
             range='A1:G1',
             valueInputOption='RAW',
             body=body
         ).execute()
-        
+
         # Format the header row
         format_request = {
             'requests': [{
                 'repeatCell': {
                     'range': {
-                        'sheetId': 0,
+                        'sheetId': sheet_id,
                         'startRowIndex': 0,
                         'endRowIndex': 1,
                         'startColumnIndex': 0,
@@ -296,12 +289,12 @@ def create_google_sheet(job_title: str, form_id: str) -> Tuple[str, str]:
                 }
             }]
         }
-        
+
         sheets_service.spreadsheets().batchUpdate(
-            spreadsheetId=sheet_id,
+            spreadsheetId=spreadsheet_id,
             body=format_request
         ).execute()
-        
+
         # Link the form to the sheet (this creates the automatic response collection)
         try:
             forms_service.forms().batchUpdate(
@@ -310,7 +303,7 @@ def create_google_sheet(job_title: str, form_id: str) -> Tuple[str, str]:
                     "requests": [{
                         "updateFormInfo": {
                             "info": {
-                                "linkedSheetId": sheet_id
+                                "linkedSheetId": spreadsheet_id
                             },
                             "updateMask": "linkedSheetId"
                         }
@@ -318,12 +311,13 @@ def create_google_sheet(job_title: str, form_id: str) -> Tuple[str, str]:
                 }
             ).execute()
         except Exception as e:
-            logger.warning(f"Could not link form to sheet automatically: {str(e)}")
+            logger.warning(
+                f"Could not link form to sheet automatically: {str(e)}")
             # This is not critical, responses can still be fetched manually
-        
-        logger.info(f"Successfully created Google Sheet: {sheet_id}")
-        return sheet_id, sheet_url
-        
+
+        logger.info(f"Successfully created Google Sheet: {spreadsheet_id}")
+        return spreadsheet_id, sheet_url
+
     except HttpError as error:
         logger.error(f"Google Sheets API error: {error}")
         raise Exception(f"Failed to create Google Sheet: {error}")
@@ -335,20 +329,20 @@ def create_google_sheet(job_title: str, form_id: str) -> Tuple[str, str]:
 def get_form_responses(form_id: str) -> list:
     """
     Get all responses from a Google Form
-    
+
     Returns:
         List of response dictionaries
     """
     try:
         credentials = get_google_credentials()
         service = build('forms', 'v1', credentials=credentials)
-        
+
         # Get form responses
         responses = service.forms().responses().list(formId=form_id).execute()
-        
+
         if 'responses' not in responses:
             return []
-        
+
         # Parse responses
         parsed_responses = []
         for response in responses['responses']:
@@ -357,19 +351,20 @@ def get_form_responses(form_id: str) -> list:
                 'timestamp': response['lastSubmittedTime'],
                 'answers': {}
             }
-            
+
             if 'answers' in response:
                 for question_id, answer in response['answers'].items():
                     if 'textAnswers' in answer:
                         parsed_response['answers'][question_id] = answer['textAnswers']['answers'][0]['value']
                     elif 'choiceAnswers' in answer:
                         parsed_response['answers'][question_id] = answer['choiceAnswers']['answers'][0]['value']
-            
+
             parsed_responses.append(parsed_response)
-        
-        logger.info(f"Retrieved {len(parsed_responses)} responses from form {form_id}")
+
+        logger.info(
+            f"Retrieved {len(parsed_responses)} responses from form {form_id}")
         return parsed_responses
-        
+
     except HttpError as error:
         logger.error(f"Google Forms API error: {error}")
         return []
@@ -381,29 +376,29 @@ def get_form_responses(form_id: str) -> list:
 def get_sheet_responses(sheet_id: str) -> list:
     """
     Get all responses from a Google Sheet
-    
+
     Returns:
         List of response dictionaries
     """
     try:
         credentials = get_google_credentials()
         service = build('sheets', 'v4', credentials=credentials)
-        
+
         # Get all data from the sheet
         result = service.spreadsheets().values().get(
             spreadsheetId=sheet_id,
             range='A:Z'  # Get all columns
         ).execute()
-        
+
         values = result.get('values', [])
-        
+
         if not values or len(values) < 2:
             return []
-        
+
         # First row is headers
         headers = values[0]
         responses = []
-        
+
         for row in values[1:]:  # Skip header row
             response = {}
             for i, header in enumerate(headers):
@@ -412,13 +407,63 @@ def get_sheet_responses(sheet_id: str) -> list:
                 else:
                     response[header] = ''
             responses.append(response)
-        
-        logger.info(f"Retrieved {len(responses)} responses from sheet {sheet_id}")
+
+        logger.info(
+            f"Retrieved {len(responses)} responses from sheet {sheet_id}")
         return responses
-        
+
     except HttpError as error:
         logger.error(f"Google Sheets API error: {error}")
         return []
     except Exception as e:
         logger.error(f"Error getting sheet responses: {str(e)}")
-        return [] 
+        return []
+
+
+def get_a_google_form(form_id: str) -> Dict[str, Any]:
+    """
+    Retrieve a Google Form by ID using real Google Forms API
+    """
+    try:
+        credentials = get_google_credentials()
+        service = build('forms', 'v1', credentials=credentials)
+
+        # Get the form
+        form = service.forms().get(formId=form_id).execute()
+
+        if not form:
+            raise ValueError(f"No form found with ID {form_id}")
+
+        return form
+
+    except HttpError as error:
+        logger.error(f"Google Forms API error: {error}")
+        raise Exception(f"Failed to retrieve Google Form: {error}")
+    except Exception as e:
+        logger.error(f"Error retrieving Google Form: {str(e)}")
+        raise e
+
+
+def grant_form_permissions(form_id: str, permission_body: dict) -> None:
+    """
+    Grant edit permissions to a Google Form for a specific email address
+    """
+    try:
+        credentials = get_google_credentials()
+        service = build('drive', 'v3', credentials=credentials)
+
+        # Grant permission
+        service.permissions().create(
+            fileId=form_id,
+            body=permission_body,
+            sendNotificationEmail=False
+        ).execute()
+
+        logger.info(f"Granted permissions {permission_body} on form {form_id}")
+
+    except HttpError as error:
+        logger.error(f"Google Drive API error: {error}")
+        raise Exception(f"Failed to grant permissions: {error}")
+    except Exception as e:
+        logger.error(f"Error granting permissions: {str(e)}")
+        raise e

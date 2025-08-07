@@ -17,19 +17,35 @@ interface Job {
   updated_at: string;
 }
 
+interface PaginatedResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Job[];
+}
+
 const JobList = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const pageSize = 5;
 
   useEffect(() => {
     fetchJobs();
-  }, []);
+  }, [currentPage]);
 
   const fetchJobs = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/posting/jobs/list/`);
-      setJobs(response.data.results || response.data);
+      setLoading(true);
+      const response = await axios.get(`${BASE_URL}/posting/jobs/list/?page=${currentPage}`);
+      const data: PaginatedResponse = response.data;
+      
+      setJobs(data.results || []);
+      setTotalCount(data.count || 0);
+      setTotalPages(Math.ceil((data.count || 0) / pageSize));
     } catch (error) {
       console.error("Error fetching jobs:", error);
       toast.error("Failed to fetch jobs");
@@ -38,6 +54,7 @@ const JobList = () => {
     }
   };
 
+  // Filter jobs locally within the current page
   const filteredJobs = jobs.filter(job =>
     job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -54,6 +71,30 @@ const JobList = () => {
   const truncateDescription = (description: string, maxLength: number = 150) => {
     if (description.length <= maxLength) return description;
     return description.substring(0, maxLength) + "...";
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      setSearchTerm(""); // Clear search when changing pages
+    }
+  };
+
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   if (loading) {
@@ -121,69 +162,123 @@ const JobList = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                        {job.title}
-                      </h3>
-                      <p className="text-gray-600 mb-4">
-                        {truncateDescription(job.description)}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span>Created: {formatDate(job.created_at)}</span>
-                        <span>•</span>
-                        <span>Updated: {formatDate(job.updated_at)}</span>
+            <>
+              <div className="space-y-4">
+                {filteredJobs.map((job) => (
+                  <div
+                    key={job.id}
+                    className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                          {job.title}
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          {truncateDescription(job.description)}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span>Created: {formatDate(job.created_at)}</span>
+                          <span>•</span>
+                          <span>Updated: {formatDate(job.updated_at)}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="ml-6 flex flex-col gap-2">
+                        <Link
+                          to={`/jobs/${job.id}`}
+                          className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors text-center"
+                        >
+                          View Details
+                        </Link>
+                        <Link
+                          to={`/jobs/${job.id}/matches`}
+                          className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors text-center"
+                        >
+                          View Matches
+                        </Link>
                       </div>
                     </div>
-                    
-                    <div className="ml-6 flex flex-col gap-2">
-                      <Link
-                        to={`/jobs/${job.id}`}
-                        className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors text-center"
-                      >
-                        View Details
-                      </Link>
-                      <Link
-                        to={`/jobs/${job.id}/matches`}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors text-center"
-                      >
-                        View Matches
-                      </Link>
+
+                    {/* Automation Status */}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <div className="flex items-center gap-6 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-3 h-3 rounded-full ${job.google_form_url ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                          <span className={job.google_form_url ? 'text-green-600' : 'text-gray-500'}>
+                            Google Form
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`w-3 h-3 rounded-full ${job.google_sheet_url ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                          <span className={job.google_sheet_url ? 'text-green-600' : 'text-gray-500'}>
+                            Google Sheet
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`w-3 h-3 rounded-full ${job.twitter_post_id ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                          <span className={job.twitter_post_id ? 'text-green-600' : 'text-gray-500'}>
+                            Twitter Post
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
 
-                  {/* Automation Status */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex items-center gap-6 text-sm">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-3 h-3 rounded-full ${job.google_form_url ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                        <span className={job.google_form_url ? 'text-green-600' : 'text-gray-500'}>
-                          Google Form
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`w-3 h-3 rounded-full ${job.google_sheet_url ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                        <span className={job.google_sheet_url ? 'text-green-600' : 'text-gray-500'}>
-                          Google Sheet
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`w-3 h-3 rounded-full ${job.twitter_post_id ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                        <span className={job.twitter_post_id ? 'text-green-600' : 'text-gray-500'}>
-                          Twitter Post
-                        </span>
-                      </div>
-                    </div>
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} jobs
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage <= 1}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage <= 1
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Previous
+                    </button>
+
+                    {/* Page Numbers */}
+                    {generatePageNumbers().map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          pageNum === currentPage
+                            ? 'bg-primary text-white'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage >= totalPages}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        currentPage >= totalPages
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      Next
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -191,4 +286,4 @@ const JobList = () => {
   );
 };
 
-export default JobList; 
+export default JobList;
